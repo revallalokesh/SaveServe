@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const hostelSchema = new mongoose.Schema({
   name: {
@@ -55,6 +56,15 @@ hostelSchema.methods.comparePassword = async function(candidatePassword) {
   } catch (error) {
     throw error;
   }
+};
+
+// Generate JWT token
+hostelSchema.methods.generateAuthToken = function() {
+  return jwt.sign(
+    { id: this._id, role: 'owner' },
+    process.env.JWT_SECRET,
+    { expiresIn: '24h' }
+  );
 };
 
 // Delete and recreate the model to ensure clean state

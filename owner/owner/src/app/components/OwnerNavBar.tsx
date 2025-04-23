@@ -25,17 +25,26 @@ const defaultItems: NavItem[] = [
   { name: "Analytics", url: "/analytics", icon: BarChart2 },
   { name: "Scan QR", url: "/scan", icon: ScanLine },
   { name: "Settings", url: "/settings", icon: Settings },
+]
+
+const publicItems: NavItem[] = [
+  { name: "Request Sign Up", url: "/signup", icon: AlertCircle },
   { name: "Contact Support", url: "/support", icon: MessageSquare },
-  { name: "Raise Complaint", url: "/complaint", icon: AlertCircle },
 ]
 
 export function OwnerNavBar({ items = defaultItems, className }: NavBarProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(true) // Set to true for temporary data
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
+  useEffect(() => {
+    const storedData = localStorage.getItem('ownerData')
+    setIsLoggedIn(!!storedData)
+  }, [])
+
   const handleLogout = () => {
+    localStorage.removeItem('ownerData')
     setIsLoggedIn(false)
     router.push('/')
   }
@@ -50,36 +59,52 @@ export function OwnerNavBar({ items = defaultItems, className }: NavBarProps) {
       <div className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-center h-16 gap-1">
-            {items.map((item) => (
-              <Link
-                key={item.name}
-                href={item.url}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200",
-                  pathname === item.url && "bg-white/10 text-white"
-                )}
-              >
-                <item.icon size={18} strokeWidth={2} />
-                <span className="hidden sm:inline">{item.name}</span>
-              </Link>
-            ))}
-            
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 ml-2"
-              >
-                <LogOut size={18} strokeWidth={2} />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
+              <>
+                {items.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.url}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200",
+                      pathname === item.url && "bg-white/10 text-white"
+                    )}
+                  >
+                    <item.icon size={18} strokeWidth={2} />
+                    <span className="hidden sm:inline">{item.name}</span>
+                  </Link>
+                ))}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 ml-2"
+                >
+                  <LogOut size={18} strokeWidth={2} />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </>
             ) : (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 ml-2"
-              >
-                <LogIn size={18} strokeWidth={2} />
-                <span className="hidden sm:inline">Login</span>
-              </button>
+              <>
+                {publicItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.url}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200",
+                      pathname === item.url && "bg-white/10 text-white"
+                    )}
+                  >
+                    <item.icon size={18} strokeWidth={2} />
+                    <span className="hidden sm:inline">{item.name}</span>
+                  </Link>
+                ))}
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 ml-2"
+                >
+                  <LogIn size={18} strokeWidth={2} />
+                  <span className="hidden sm:inline">Login</span>
+                </button>
+              </>
             )}
           </div>
         </div>

@@ -1,39 +1,33 @@
 "use client"
 
 import React from "react"
-import { Building2, Mail, User, Edit, Camera } from "lucide-react"
-import Image from "next/image"
+import { Building2, User, Edit } from "lucide-react"
 
 interface OwnerProfileProps {
   ownerData: {
+    id: string
+    username: string
     name: string
-    email: string
-    hostel: {
+    role: string
+    hostel?: {
       name: string
     }
   }
 }
 
 export function OwnerProfile({ ownerData }: OwnerProfileProps) {
+  if (!ownerData) {
+    return (
+      <div className="bg-[#1a1b1e] rounded-2xl p-8 shadow-xl border border-gray-800">
+        <p className="text-gray-400">Loading profile...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#1a1b1e] rounded-2xl p-8 shadow-xl border border-gray-800">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
-        <div className="relative group">
-          <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-800 border-2 border-gray-700">
-            <Image
-              src="/placeholder-avatar.png"
-              alt="Profile"
-              width={96}
-              height={96}
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <button className="absolute bottom-2 right-2 p-1.5 bg-primary rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
-            <Camera size={14} />
-          </button>
-        </div>
-
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-bold text-white">{ownerData.name}</h1>
@@ -57,19 +51,21 @@ export function OwnerProfile({ ownerData }: OwnerProfileProps) {
 
         <div className="p-4 bg-white/5 rounded-xl">
           <div className="flex items-center gap-3 text-gray-400 mb-1">
-            <Mail size={18} />
-            <span className="text-sm font-medium">Email Address</span>
+            <User size={18} />
+            <span className="text-sm font-medium">Username</span>
           </div>
-          <p className="text-white pl-8">{ownerData.email}</p>
+          <p className="text-white pl-8">{ownerData.username}</p>
         </div>
 
-        <div className="p-4 bg-white/5 rounded-xl">
-          <div className="flex items-center gap-3 text-gray-400 mb-1">
-            <Building2 size={18} />
-            <span className="text-sm font-medium">Hostel Name</span>
+        {ownerData.hostel && (
+          <div className="p-4 bg-white/5 rounded-xl">
+            <div className="flex items-center gap-3 text-gray-400 mb-1">
+              <Building2 size={18} />
+              <span className="text-sm font-medium">Hostel Name</span>
+            </div>
+            <p className="text-white pl-8">{ownerData.hostel.name}</p>
           </div>
-          <p className="text-white pl-8">{ownerData.hostel.name}</p>
-        </div>
+        )}
       </div>
 
       {/* Quick Actions */}

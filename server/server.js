@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const hostelRoutes = require('./routes/hostels');
+const ownerRoutes = require('./routes/owner');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -35,9 +36,14 @@ app.use(express.json());
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  console.log('Request headers:', req.headers);
-  console.log('Request body:', req.body);
+  console.log(`\n[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  if (Object.keys(req.body).length > 0) {
+    const sanitizedBody = { ...req.body };
+    if (sanitizedBody.password) {
+      sanitizedBody.password = '[HIDDEN]';
+    }
+    console.log('Request body:', sanitizedBody);
+  }
   next();
 });
 
@@ -45,6 +51,7 @@ app.use((req, res, next) => {
 app.use('/api', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/hostels', hostelRoutes);
+app.use('/api/owner', ownerRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -57,6 +64,7 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
+  console.log(`[404] Route not found: ${req.method} ${req.url}`);
   res.status(404).json({ message: 'Route not found' });
 });
 
