@@ -25,183 +25,140 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 ;
 ;
 ;
-// Temporary menu data
-const initialMenu = {
+const defaultMenu = {
     Monday: {
-        breakfast: [
-            "Idli",
-            "Sambar",
-            "Chutney",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Dal",
-            "Mixed Veg Curry",
-            "Curd",
-            "Papad"
-        ],
-        dinner: [
-            "Chapati",
-            "Paneer Butter Masala",
-            "Jeera Rice",
-            "Sweet"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     },
     Tuesday: {
-        breakfast: [
-            "Dosa",
-            "Sambar",
-            "Chutney",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Sambar",
-            "Bhindi Fry",
-            "Curd",
-            "Pickle"
-        ],
-        dinner: [
-            "Chapati",
-            "Veg Curry",
-            "Rice",
-            "Ice Cream"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     },
     Wednesday: {
-        breakfast: [
-            "Puri",
-            "Aloo Bhaji",
-            "Upma",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Dal Tadka",
-            "Cabbage Curry",
-            "Curd",
-            "Papad"
-        ],
-        dinner: [
-            "Chapati",
-            "Mushroom Curry",
-            "Rice",
-            "Fruit Custard"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     },
     Thursday: {
-        breakfast: [
-            "Uttapam",
-            "Sambar",
-            "Chutney",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Rajma",
-            "Aloo Gobi",
-            "Curd",
-            "Pickle"
-        ],
-        dinner: [
-            "Chapati",
-            "Dal Makhani",
-            "Rice",
-            "Kheer"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     },
     Friday: {
-        breakfast: [
-            "Poha",
-            "Boiled Eggs/Sprouts",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Dal",
-            "Palak Paneer",
-            "Curd",
-            "Papad"
-        ],
-        dinner: [
-            "Chapati",
-            "Mix Veg Curry",
-            "Rice",
-            "Halwa"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     },
     Saturday: {
-        breakfast: [
-            "Vada",
-            "Sambar",
-            "Chutney",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Sambar",
-            "Potato Curry",
-            "Curd",
-            "Pickle"
-        ],
-        dinner: [
-            "Chapati",
-            "Chana Masala",
-            "Rice",
-            "Gulab Jamun"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     },
     Sunday: {
-        breakfast: [
-            "Paratha",
-            "Chole",
-            "Curd",
-            "Coffee/Tea"
-        ],
-        lunch: [
-            "Rice",
-            "Dal Fry",
-            "Veg Korma",
-            "Curd",
-            "Papad"
-        ],
-        dinner: [
-            "Chapati",
-            "Matar Paneer",
-            "Rice",
-            "Rasmalai"
-        ]
+        breakfast: [],
+        lunch: [],
+        dinner: []
     }
 };
 function FoodMenu() {
-    const [menu, setMenu] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(initialMenu);
+    const [menu, setMenu] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(defaultMenu);
     const [isEditModalVisible, setIsEditModalVisible] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [selectedDay, setSelectedDay] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [selectedMeal, setSelectedMeal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("breakfast");
+    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     const [form] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$form$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Form$3e$__["Form"].useForm();
+    const fetchMenu = async ()=>{
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$message$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__message$3e$__["message"].error('Please login first');
+                return;
+            }
+            const response = await fetch('http://localhost:5001/api/menu', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch menu');
+            }
+            const data = await response.json();
+            // Validate and sanitize the received data
+            const validatedMenu = {
+                ...defaultMenu
+            };
+            Object.keys(defaultMenu).forEach((day)=>{
+                if (data[day]) {
+                    validatedMenu[day] = {
+                        breakfast: Array.isArray(data[day].breakfast) ? data[day].breakfast : [],
+                        lunch: Array.isArray(data[day].lunch) ? data[day].lunch : [],
+                        dinner: Array.isArray(data[day].dinner) ? data[day].dinner : []
+                    };
+                }
+            });
+            setMenu(validatedMenu);
+        } catch (error) {
+            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$message$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__message$3e$__["message"].error('Failed to fetch menu');
+            console.error('Error:', error);
+        } finally{
+            setLoading(false);
+        }
+    };
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        fetchMenu();
+    }, []);
     const handleEdit = (day, meal)=>{
         setSelectedDay(day);
         setSelectedMeal(meal);
+        const items = menu[day]?.[meal] || [];
         form.setFieldsValue({
-            items: menu[day][meal].join(", ")
+            items: items.join(", ")
         });
         setIsEditModalVisible(true);
     };
-    const handleSave = (values)=>{
+    const handleSave = async (values)=>{
         try {
-            const items = values.items.split(",").map((item)=>item.trim());
-            setMenu((prev)=>({
-                    ...prev,
-                    [selectedDay]: {
-                        ...prev[selectedDay],
-                        [selectedMeal]: items
-                    }
-                }));
+            const token = localStorage.getItem('token');
+            if (!token) {
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$message$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__message$3e$__["message"].error('Please login first');
+                return;
+            }
+            const items = values.items.split(",").map((item)=>item.trim()).filter((item)=>item);
+            const response = await fetch(`http://localhost:5001/api/menu/${selectedDay}/${selectedMeal}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    items
+                })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update menu');
+            }
+            const updatedMenu = await response.json();
+            // Validate and sanitize the received data
+            const validatedMenu = {
+                ...defaultMenu
+            };
+            Object.keys(defaultMenu).forEach((day)=>{
+                if (updatedMenu[day]) {
+                    validatedMenu[day] = {
+                        breakfast: Array.isArray(updatedMenu[day].breakfast) ? updatedMenu[day].breakfast : [],
+                        lunch: Array.isArray(updatedMenu[day].lunch) ? updatedMenu[day].lunch : [],
+                        dinner: Array.isArray(updatedMenu[day].dinner) ? updatedMenu[day].dinner : []
+                    };
+                }
+            });
+            setMenu(validatedMenu);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$message$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__message$3e$__["message"].success("Menu updated successfully");
             setIsEditModalVisible(false);
         } catch (error) {
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$message$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__message$3e$__["message"].error("Failed to update menu");
+            console.error('Error:', error);
         }
     };
     const getMealIcon = (meal)=>{
@@ -211,7 +168,7 @@ function FoodMenu() {
                     className: "w-5 h-5"
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/FoodMenu.tsx",
-                    lineNumber: 92,
+                    lineNumber: 139,
                     columnNumber: 16
                 }, this);
             case "lunch":
@@ -219,7 +176,7 @@ function FoodMenu() {
                     className: "w-5 h-5"
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/FoodMenu.tsx",
-                    lineNumber: 94,
+                    lineNumber: 141,
                     columnNumber: 16
                 }, this);
             case "dinner":
@@ -227,11 +184,28 @@ function FoodMenu() {
                     className: "w-5 h-5"
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/FoodMenu.tsx",
-                    lineNumber: 96,
+                    lineNumber: 143,
                     columnNumber: 16
                 }, this);
         }
     };
+    if (loading) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "flex justify-center items-center min-h-[400px]",
+            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "text-gray-400",
+                children: "Loading menu..."
+            }, void 0, false, {
+                fileName: "[project]/src/app/components/FoodMenu.tsx",
+                lineNumber: 150,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "[project]/src/app/components/FoodMenu.tsx",
+            lineNumber: 149,
+            columnNumber: 7
+        }, this);
+    }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "jsx-c0f39ff58982871b" + " " + "space-y-6",
         children: [
@@ -242,12 +216,12 @@ function FoodMenu() {
                     children: "Weekly Food Menu"
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/FoodMenu.tsx",
-                    lineNumber: 103,
+                    lineNumber: 158,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                lineNumber: 102,
+                lineNumber: 157,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -260,7 +234,7 @@ function FoodMenu() {
                                 children: day
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                lineNumber: 109,
+                                lineNumber: 164,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -280,13 +254,13 @@ function FoodMenu() {
                                                                 children: mealType
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                                lineNumber: 120,
+                                                                lineNumber: 175,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                        lineNumber: 118,
+                                                        lineNumber: 173,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -296,55 +270,55 @@ function FoodMenu() {
                                                             className: "w-4 h-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                            lineNumber: 126,
+                                                            lineNumber: 181,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                        lineNumber: 122,
+                                                        lineNumber: 177,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                lineNumber: 117,
+                                                lineNumber: 172,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "jsx-c0f39ff58982871b" + " " + "pl-7",
-                                                children: meals[mealType].map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                children: (meals[mealType] || []).map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         className: "jsx-c0f39ff58982871b" + " " + "inline-block bg-white/[0.06] text-gray-300 rounded-full px-3 py-1 text-sm mr-2 mb-2",
                                                         children: item
                                                     }, index, false, {
                                                         fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                        lineNumber: 132,
+                                                        lineNumber: 187,
                                                         columnNumber: 23
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                                lineNumber: 130,
+                                                lineNumber: 185,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, mealType, true, {
                                         fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                        lineNumber: 113,
+                                        lineNumber: 168,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                lineNumber: 111,
+                                lineNumber: 166,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, day, true, {
                         fileName: "[project]/src/app/components/FoodMenu.tsx",
-                        lineNumber: 108,
+                        lineNumber: 163,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                lineNumber: 106,
+                lineNumber: 161,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$modal$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Modal$3e$__["Modal"], {
@@ -360,12 +334,12 @@ function FoodMenu() {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/components/FoodMenu.tsx",
-                        lineNumber: 150,
+                        lineNumber: 205,
                         columnNumber: 13
                     }, void 0)
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/FoodMenu.tsx",
-                    lineNumber: 149,
+                    lineNumber: 204,
                     columnNumber: 11
                 }, void 0),
                 open: isEditModalVisible,
@@ -395,12 +369,12 @@ function FoodMenu() {
                                 className: "modern-input"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                lineNumber: 167,
+                                lineNumber: 222,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/FoodMenu.tsx",
-                            lineNumber: 162,
+                            lineNumber: 217,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$form$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Form$3e$__["Form"].Item, {
@@ -410,23 +384,23 @@ function FoodMenu() {
                                 children: "Save Changes"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                                lineNumber: 174,
+                                lineNumber: 229,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/FoodMenu.tsx",
-                            lineNumber: 173,
+                            lineNumber: 228,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/components/FoodMenu.tsx",
-                    lineNumber: 161,
+                    lineNumber: 216,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/components/FoodMenu.tsx",
-                lineNumber: 147,
+                lineNumber: 202,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -436,7 +410,7 @@ function FoodMenu() {
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/components/FoodMenu.tsx",
-        lineNumber: 101,
+        lineNumber: 156,
         columnNumber: 5
     }, this);
 }

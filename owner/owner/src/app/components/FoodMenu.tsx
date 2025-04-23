@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Modal, Form, Input, message } from "antd"
 import { Edit3, Coffee, Sun, Moon } from "lucide-react"
 
@@ -14,75 +14,122 @@ interface WeeklyMenu {
   [key: string]: Meal
 }
 
-// Temporary menu data
-const initialMenu: WeeklyMenu = {
-  Monday: {
-    breakfast: ["Idli", "Sambar", "Chutney", "Coffee/Tea"],
-    lunch: ["Rice", "Dal", "Mixed Veg Curry", "Curd", "Papad"],
-    dinner: ["Chapati", "Paneer Butter Masala", "Jeera Rice", "Sweet"]
-  },
-  Tuesday: {
-    breakfast: ["Dosa", "Sambar", "Chutney", "Coffee/Tea"],
-    lunch: ["Rice", "Sambar", "Bhindi Fry", "Curd", "Pickle"],
-    dinner: ["Chapati", "Veg Curry", "Rice", "Ice Cream"]
-  },
-  Wednesday: {
-    breakfast: ["Puri", "Aloo Bhaji", "Upma", "Coffee/Tea"],
-    lunch: ["Rice", "Dal Tadka", "Cabbage Curry", "Curd", "Papad"],
-    dinner: ["Chapati", "Mushroom Curry", "Rice", "Fruit Custard"]
-  },
-  Thursday: {
-    breakfast: ["Uttapam", "Sambar", "Chutney", "Coffee/Tea"],
-    lunch: ["Rice", "Rajma", "Aloo Gobi", "Curd", "Pickle"],
-    dinner: ["Chapati", "Dal Makhani", "Rice", "Kheer"]
-  },
-  Friday: {
-    breakfast: ["Poha", "Boiled Eggs/Sprouts", "Coffee/Tea"],
-    lunch: ["Rice", "Dal", "Palak Paneer", "Curd", "Papad"],
-    dinner: ["Chapati", "Mix Veg Curry", "Rice", "Halwa"]
-  },
-  Saturday: {
-    breakfast: ["Vada", "Sambar", "Chutney", "Coffee/Tea"],
-    lunch: ["Rice", "Sambar", "Potato Curry", "Curd", "Pickle"],
-    dinner: ["Chapati", "Chana Masala", "Rice", "Gulab Jamun"]
-  },
-  Sunday: {
-    breakfast: ["Paratha", "Chole", "Curd", "Coffee/Tea"],
-    lunch: ["Rice", "Dal Fry", "Veg Korma", "Curd", "Papad"],
-    dinner: ["Chapati", "Matar Paneer", "Rice", "Rasmalai"]
-  }
+const defaultMenu: WeeklyMenu = {
+  Monday: { breakfast: [], lunch: [], dinner: [] },
+  Tuesday: { breakfast: [], lunch: [], dinner: [] },
+  Wednesday: { breakfast: [], lunch: [], dinner: [] },
+  Thursday: { breakfast: [], lunch: [], dinner: [] },
+  Friday: { breakfast: [], lunch: [], dinner: [] },
+  Saturday: { breakfast: [], lunch: [], dinner: [] },
+  Sunday: { breakfast: [], lunch: [], dinner: [] }
 }
 
 export function FoodMenu() {
-  const [menu, setMenu] = useState<WeeklyMenu>(initialMenu)
+  const [menu, setMenu] = useState<WeeklyMenu>(defaultMenu)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [selectedDay, setSelectedDay] = useState<string>("")
   const [selectedMeal, setSelectedMeal] = useState<keyof Meal>("breakfast")
+  const [loading, setLoading] = useState(true)
   const [form] = Form.useForm()
+
+  const fetchMenu = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        message.error('Please login first')
+        return
+      }
+
+      const response = await fetch('http://localhost:5001/api/menu', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch menu')
+      }
+
+      const data = await response.json()
+      
+      // Validate and sanitize the received data
+      const validatedMenu: WeeklyMenu = { ...defaultMenu }
+      Object.keys(defaultMenu).forEach(day => {
+        if (data[day]) {
+          validatedMenu[day] = {
+            breakfast: Array.isArray(data[day].breakfast) ? data[day].breakfast : [],
+            lunch: Array.isArray(data[day].lunch) ? data[day].lunch : [],
+            dinner: Array.isArray(data[day].dinner) ? data[day].dinner : []
+          }
+        }
+      })
+      
+      setMenu(validatedMenu)
+    } catch (error) {
+      message.error('Failed to fetch menu')
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchMenu()
+  }, [])
 
   const handleEdit = (day: string, meal: keyof Meal) => {
     setSelectedDay(day)
     setSelectedMeal(meal)
+    const items = menu[day]?.[meal] || []
     form.setFieldsValue({
-      items: menu[day][meal].join(", ")
+      items: items.join(", ")
     })
     setIsEditModalVisible(true)
   }
 
-  const handleSave = (values: { items: string }) => {
+  const handleSave = async (values: { items: string }) => {
     try {
-      const items = values.items.split(",").map(item => item.trim())
-      setMenu(prev => ({
-        ...prev,
-        [selectedDay]: {
-          ...prev[selectedDay],
-          [selectedMeal]: items
+      const token = localStorage.getItem('token')
+      if (!token) {
+        message.error('Please login first')
+        return
+      }
+
+      const items = values.items.split(",").map(item => item.trim()).filter(item => item)
+      
+      const response = await fetch(`http://localhost:5001/api/menu/${selectedDay}/${selectedMeal}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ items })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update menu')
+      }
+
+      const updatedMenu = await response.json()
+      
+      // Validate and sanitize the received data
+      const validatedMenu: WeeklyMenu = { ...defaultMenu }
+      Object.keys(defaultMenu).forEach(day => {
+        if (updatedMenu[day]) {
+          validatedMenu[day] = {
+            breakfast: Array.isArray(updatedMenu[day].breakfast) ? updatedMenu[day].breakfast : [],
+            lunch: Array.isArray(updatedMenu[day].lunch) ? updatedMenu[day].lunch : [],
+            dinner: Array.isArray(updatedMenu[day].dinner) ? updatedMenu[day].dinner : []
+          }
         }
-      }))
+      })
+      
+      setMenu(validatedMenu)
       message.success("Menu updated successfully")
       setIsEditModalVisible(false)
     } catch (error) {
       message.error("Failed to update menu")
+      console.error('Error:', error)
     }
   }
 
@@ -95,6 +142,14 @@ export function FoodMenu() {
       case "dinner":
         return <Moon className="w-5 h-5" />
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="text-gray-400">Loading menu...</div>
+      </div>
+    )
   }
 
   return (
@@ -128,7 +183,7 @@ export function FoodMenu() {
                   </div>
                   
                   <div className="pl-7">
-                    {meals[mealType].map((item, index) => (
+                    {(meals[mealType] || []).map((item, index) => (
                       <span
                         key={index}
                         className="inline-block bg-white/[0.06] text-gray-300 rounded-full px-3 py-1 text-sm mr-2 mb-2"
