@@ -3,14 +3,20 @@ require('dotenv').config({ path: '.env' });
 
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const hostelRoutes = require('./routes/hostels');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Connect to MongoDB
+connectDB();
+
 // CORS configuration
 const corsOptions = {
-  origin: true, // Allow all origins
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'], // Add your frontend URLs
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   credentials: true,
@@ -27,12 +33,22 @@ app.options('*', cors(corsOptions));
 // Middleware
 app.use(express.json());
 
-// Routes - mount auth routes at /api instead of /api/auth to match frontend
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+  next();
+});
+
+// Routes
 app.use('/api', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/hostels', hostelRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error:', err);
   res.status(500).json({ 
     message: 'Something broke!',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
