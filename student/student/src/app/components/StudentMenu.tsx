@@ -10,16 +10,17 @@ import QRCode from 'antd/es/qrcode';
 import message from 'antd/es/message';
 import Table from 'antd/es/table';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import type { TabsProps } from 'antd/es/tabs';
 import './menu.css';
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 interface MealOption {
   opted: boolean;
   locked: boolean;
   qrCode?: string;
+  submitted: boolean;
 }
 
 interface DayMeals {
@@ -36,53 +37,108 @@ interface WeeklyMenu {
   };
 }
 
+interface MenuItem {
+  name: string;
+  description?: string;
+  type: 'breakfast' | 'lunch' | 'dinner';
+}
+
+interface DayMenuData {
+  breakfast: string[];
+  lunch: string[];
+  dinner: string[];
+}
+
+interface WeeklyMenuData {
+  [key: string]: DayMenuData;
+  Monday: DayMenuData;
+  Tuesday: DayMenuData;
+  Wednesday: DayMenuData;
+  Thursday: DayMenuData;
+  Friday: DayMenuData;
+  Saturday: DayMenuData;
+  Sunday: DayMenuData;
+}
+
 const StudentMenu: React.FC = () => {
   const router = useRouter();
   const [selectedDay, setSelectedDay] = useState<string>(getCurrentDay());
   const [mealOptions, setMealOptions] = useState<DayMeals>({
-    breakfast: { opted: false, locked: false },
-    lunch: { opted: false, locked: false },
-    dinner: { opted: false, locked: false }
+    breakfast: { opted: false, locked: false, submitted: false },
+    lunch: { opted: false, locked: false, submitted: false },
+    dinner: { opted: false, locked: false, submitted: false }
   });
 
-  // Mock weekly menu data
-  const weeklyMenu: WeeklyMenu = {
-    Monday: {
-      breakfast: ['Idli', 'Sambar', 'Chutney', 'Coffee/Tea'],
-      lunch: ['Rice', 'Dal', 'Mixed Veg Curry', 'Curd', 'Papad'],
-      dinner: ['Chapati', 'Paneer Butter Masala', 'Jeera Rice', 'Sweet']
-    },
-    Tuesday: {
-      breakfast: ['Dosa', 'Sambar', 'Chutney', 'Coffee/Tea'],
-      lunch: ['Rice', 'Sambar', 'Bhindi Fry', 'Curd', 'Pickle'],
-      dinner: ['Chapati', 'Veg Curry', 'Rice', 'Ice Cream']
-    },
-    Wednesday: {
-      breakfast: ['Puri', 'Aloo Bhaji', 'Upma', 'Coffee/Tea'],
-      lunch: ['Rice', 'Dal Tadka', 'Cabbage Curry', 'Curd', 'Papad'],
-      dinner: ['Chapati', 'Mushroom Curry', 'Rice', 'Fruit Custard']
-    },
-    Thursday: {
-      breakfast: ['Uttapam', 'Sambar', 'Chutney', 'Coffee/Tea'],
-      lunch: ['Rice', 'Rajma', 'Aloo Gobi', 'Curd', 'Pickle'],
-      dinner: ['Chapati', 'Dal Makhani', 'Rice', 'Kheer']
-    },
-    Friday: {
-      breakfast: ['Poha', 'Boiled Eggs/Sprouts', 'Coffee/Tea'],
-      lunch: ['Rice', 'Dal', 'Palak Paneer', 'Curd', 'Papad'],
-      dinner: ['Chapati', 'Mix Veg Curry', 'Rice', 'Halwa']
-    },
-    Saturday: {
-      breakfast: ['Vada', 'Sambar', 'Chutney', 'Coffee/Tea'],
-      lunch: ['Rice', 'Sambar', 'Potato Curry', 'Curd', 'Pickle'],
-      dinner: ['Chapati', 'Chana Masala', 'Rice', 'Gulab Jamun']
-    },
-    Sunday: {
-      breakfast: ['Paratha', 'Chole', 'Curd', 'Coffee/Tea'],
-      lunch: ['Rice', 'Dal Fry', 'Veg Korma', 'Curd', 'Papad'],
-      dinner: ['Chapati', 'Matar Paneer', 'Rice', 'Rasmalai']
-    }
+  const initialWeeklyMenu: WeeklyMenuData = {
+    Monday: { breakfast: [], lunch: [], dinner: [] },
+    Tuesday: { breakfast: [], lunch: [], dinner: [] },
+    Wednesday: { breakfast: [], lunch: [], dinner: [] },
+    Thursday: { breakfast: [], lunch: [], dinner: [] },
+    Friday: { breakfast: [], lunch: [], dinner: [] },
+    Saturday: { breakfast: [], lunch: [], dinner: [] },
+    Sunday: { breakfast: [], lunch: [], dinner: [] }
   };
+
+  const [weeklyMenu, setWeeklyMenu] = useState<WeeklyMenuData>(initialWeeklyMenu);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hostelId, setHostelId] = useState<string | null>(null);
+
+  // Add helper function to safely get menu items
+  const getMealItems = (day: string, type: 'breakfast' | 'lunch' | 'dinner'): string[] => {
+    return weeklyMenu[day]?.[type] || [];
+  };
+
+  useEffect(() => {
+    // Get student data from localStorage
+    const studentDataString = localStorage.getItem('studentData');
+    if (studentDataString) {
+      try {
+        const studentData = JSON.parse(studentDataString);
+        if (studentData && studentData.hostel && studentData.hostel.id) {
+          setHostelId(studentData.hostel.id);
+        } else {
+          setError('Hostel information not found in your profile.');
+          setLoading(false);
+        }
+      } catch (e) {
+        console.error("Error parsing student data from localStorage", e);
+        setError('Could not retrieve your profile information.');
+        setLoading(false);
+      }
+    } else {
+      setError('You must be logged in to view the menu.');
+      setLoading(false);
+      // Optionally redirect to login
+      // router.push('/login');
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!hostelId) return;
+
+    const fetchMenu = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`http://localhost:5001/api/student-menu/${hostelId}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+        const data: WeeklyMenuData = await response.json();
+        console.log('Fetched Menu Data:', data);
+        setWeeklyMenu(data);
+      } catch (err) {
+        console.error('Error fetching menu:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load menu. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenu();
+  }, [hostelId]);
 
   function getCurrentDay(): string {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -90,8 +146,8 @@ const StudentMenu: React.FC = () => {
   }
 
   const handleMealToggle = (meal: keyof DayMeals) => {
-    if (mealOptions[meal].locked) {
-      message.warning('This meal option is locked after submission');
+    if (mealOptions[meal].locked || mealOptions[meal].submitted) {
+      message.warning('This meal option has already been submitted');
       return;
     }
 
@@ -104,22 +160,63 @@ const StudentMenu: React.FC = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    // Generate QR codes for opted meals
-    const updatedMealOptions = { ...mealOptions };
-    Object.keys(updatedMealOptions).forEach((meal) => {
-      const mealKey = meal as keyof DayMeals;
-      if (updatedMealOptions[mealKey].opted) {
-        updatedMealOptions[mealKey] = {
-          ...updatedMealOptions[mealKey],
-          locked: true,
-          qrCode: `${selectedDay}-${meal}-${Date.now()}` // This would be your actual QR code data
-        };
-      }
-    });
+  const handleSubmit = async (meal: keyof DayMeals) => {
+    if (mealOptions[meal].submitted) {
+      message.warning('This meal has already been submitted');
+      return;
+    }
 
-    setMealOptions(updatedMealOptions);
-    message.success('Meal options submitted successfully!');
+    try {
+      const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
+      const studentId = studentData.id;
+      const hostelId = studentData.hostel?.id;
+      const studentName = studentData.name;
+      const studentEmail = studentData.email;
+
+      if (!studentId || !hostelId || !studentName || !studentEmail) {
+        throw new Error('Student information not found');
+      }
+
+      const response = await fetch('http://localhost:5001/api/student-menu/select', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
+        },
+        body: JSON.stringify({
+          studentId,
+          hostelId,
+          studentName,
+          studentEmail,
+          dayOfWeek: selectedDay,
+          selections: {
+            [meal]: true
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit meal selection');
+      }
+
+      const data = await response.json();
+      
+      setMealOptions(prev => ({
+        ...prev,
+        [meal]: {
+          ...prev[meal],
+          locked: true,
+          submitted: true,
+          qrCode: data.qrCodes[meal]
+        }
+      }));
+
+      message.success(`${meal.charAt(0).toUpperCase() + meal.slice(1)} selection submitted successfully!`);
+    } catch (error) {
+      console.error('Error submitting meal selection:', error);
+      message.error(error instanceof Error ? error.message : 'Failed to submit meal selection. Please try again.');
+    }
   };
 
   const items: TabsProps['items'] = [
@@ -134,17 +231,32 @@ const StudentMenu: React.FC = () => {
               <Switch
                 checked={mealOptions.breakfast.opted}
                 onChange={() => handleMealToggle('breakfast')}
-                disabled={mealOptions.breakfast.locked}
+                disabled={mealOptions.breakfast.locked || mealOptions.breakfast.submitted}
               />
             </div>
             <div className="meal-items">
-              {weeklyMenu[selectedDay]?.breakfast.map((item, index) => (
-                <Text key={index} className="menu-item">{item}</Text>
-              ))}
+              {getMealItems(selectedDay, 'breakfast').length > 0 ? (
+                getMealItems(selectedDay, 'breakfast').map((item: string, index: number) => (
+                  <Text key={index} className="menu-item">{item}</Text>
+                ))
+              ) : (
+                <Text type="secondary">No breakfast items listed for today.</Text>
+              )}
             </div>
-            {mealOptions.breakfast.qrCode && mealOptions.breakfast.opted && (
+            {mealOptions.breakfast.qrCode && mealOptions.breakfast.submitted ? (
               <div className="qr-code">
                 <QRCode value={mealOptions.breakfast.qrCode} />
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmit('breakfast')}
+                  disabled={!mealOptions.breakfast.opted || mealOptions.breakfast.submitted}
+                  className="w-full"
+                >
+                  {mealOptions.breakfast.submitted ? 'Submitted' : 'Submit Breakfast Selection'}
+                </Button>
               </div>
             )}
           </div>
@@ -162,17 +274,32 @@ const StudentMenu: React.FC = () => {
               <Switch
                 checked={mealOptions.lunch.opted}
                 onChange={() => handleMealToggle('lunch')}
-                disabled={mealOptions.lunch.locked}
+                disabled={mealOptions.lunch.locked || mealOptions.lunch.submitted}
               />
             </div>
             <div className="meal-items">
-              {weeklyMenu[selectedDay]?.lunch.map((item, index) => (
-                <Text key={index} className="menu-item">{item}</Text>
-              ))}
+              {getMealItems(selectedDay, 'lunch').length > 0 ? (
+                getMealItems(selectedDay, 'lunch').map((item: string, index: number) => (
+                  <Text key={index} className="menu-item">{item}</Text>
+                ))
+              ) : (
+                <Text type="secondary">No lunch items listed for today.</Text>
+              )}
             </div>
-            {mealOptions.lunch.qrCode && mealOptions.lunch.opted && (
+            {mealOptions.lunch.qrCode && mealOptions.lunch.submitted ? (
               <div className="qr-code">
                 <QRCode value={mealOptions.lunch.qrCode} />
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmit('lunch')}
+                  disabled={!mealOptions.lunch.opted || mealOptions.lunch.submitted}
+                  className="w-full"
+                >
+                  {mealOptions.lunch.submitted ? 'Submitted' : 'Submit Lunch Selection'}
+                </Button>
               </div>
             )}
           </div>
@@ -190,17 +317,32 @@ const StudentMenu: React.FC = () => {
               <Switch
                 checked={mealOptions.dinner.opted}
                 onChange={() => handleMealToggle('dinner')}
-                disabled={mealOptions.dinner.locked}
+                disabled={mealOptions.dinner.locked || mealOptions.dinner.submitted}
               />
             </div>
             <div className="meal-items">
-              {weeklyMenu[selectedDay]?.dinner.map((item, index) => (
-                <Text key={index} className="menu-item">{item}</Text>
-              ))}
+              {getMealItems(selectedDay, 'dinner').length > 0 ? (
+                getMealItems(selectedDay, 'dinner').map((item: string, index: number) => (
+                  <Text key={index} className="menu-item">{item}</Text>
+                ))
+              ) : (
+                <Text type="secondary">No dinner items listed for today.</Text>
+              )}
             </div>
-            {mealOptions.dinner.qrCode && mealOptions.dinner.opted && (
+            {mealOptions.dinner.qrCode && mealOptions.dinner.submitted ? (
               <div className="qr-code">
                 <QRCode value={mealOptions.dinner.qrCode} />
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmit('dinner')}
+                  disabled={!mealOptions.dinner.opted || mealOptions.dinner.submitted}
+                  className="w-full"
+                >
+                  {mealOptions.dinner.submitted ? 'Submitted' : 'Submit Dinner Selection'}
+                </Button>
               </div>
             )}
           </div>
@@ -208,6 +350,41 @@ const StudentMenu: React.FC = () => {
       ),
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <span className="ml-4 text-xl">Loading Menu...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl mt-20">
+         <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => router.back()}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <Title level={2} className="!mb-0">Meal Options Error</Title>
+        </div>
+        <Card className="rounded-2xl shadow-sm border border-red-200 bg-red-50">
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+            <Title level={3} className="text-red-700 !mb-2">Oops! Something went wrong.</Title>
+            <Paragraph className="text-red-600">{error}</Paragraph>
+            <Button type="primary" danger onClick={() => window.location.reload()} className="mt-4">
+              Try Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl mt-20">
@@ -227,17 +404,6 @@ const StudentMenu: React.FC = () => {
           items={items}
           className="custom-tabs"
         />
-
-        <div className="mt-6 flex justify-end">
-          <Button 
-            type="primary" 
-            onClick={handleSubmit}
-            disabled={Object.values(mealOptions).every(meal => meal.locked)}
-            className="px-8 h-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5 transition-all duration-300"
-          >
-            Submit Selections
-          </Button>
-        </div>
       </Card>
 
       <Card 
@@ -248,13 +414,15 @@ const StudentMenu: React.FC = () => {
         }
         className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100"
       >
-        <Table 
-          dataSource={Object.entries(weeklyMenu).map(([day, meals]) => ({
-            key: day,
-            day,
-            breakfast: meals.breakfast.join(', '),
-            lunch: meals.lunch.join(', '),
-            dinner: meals.dinner.join(', ')
+        <Table
+          dataSource={Object.entries(weeklyMenu)
+            .filter(([day]) => day !== '_id' && day !== 'hostelId') // Filter out non-day entries
+            .map(([day, meals]) => ({
+              key: day,
+              day,
+              breakfast: meals.breakfast.join(', ') || 'N/A',
+              lunch: meals.lunch.join(', ') || 'N/A',
+              dinner: meals.dinner.join(', ') || 'N/A'
           }))}
           columns={[
             { 

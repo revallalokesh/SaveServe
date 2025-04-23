@@ -2,6 +2,69 @@ const express = require('express');
 const router = express.Router();
 const Student = require('../models/Student');
 const auth = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+
+// Student login route
+router.post('/login', async (req, res) => {
+  try {
+    const { hostelId, email, password } = req.body;
+    console.log('[Server] Login attempt:', { email, hostelId });
+
+    // Validate required fields
+    if (!hostelId || !email || !password) {
+      return res.status(400).json({
+        error: 'Please provide all required fields'
+      });
+    }
+
+    // Find student by email and hostel
+    const student = await Student.findOne({ email, hostelId });
+    if (!student) {
+      console.log('[Server] Student not found');
+      return res.status(401).json({
+        error: 'Invalid credentials'
+      });
+    }
+    console.log('[Server] Found student:', { 
+      id: student._id,
+      name: student.name,
+      email: student.email
+    });
+
+    // Verify password
+    const isValidPassword = await student.comparePassword(password);
+    if (!isValidPassword) {
+      console.log('[Server] Invalid password');
+      return res.status(401).json({
+        error: 'Invalid credentials'
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: student._id, role: 'student', hostelId: student.hostelId },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // Return student data without password
+    const studentData = {
+      _id: student._id,
+      name: student.name,
+      email: student.email,
+      hostelId: student.hostelId
+    };
+
+    console.log('[Server] Login successful. Sending data:', studentData);
+    res.json({
+      token,
+      student: studentData
+    });
+  } catch (error) {
+    console.error('[Server] Login error:', error);
+    res.status(500).json({ error: 'Error during login' });
+  }
+});
 
 // Get all students for a hostel
 router.get('/', auth, async (req, res) => {

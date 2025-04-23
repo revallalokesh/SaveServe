@@ -48,13 +48,27 @@ export function NavBar({ items = [], className }: NavBarProps) {
     password: "",
     hostelId: ""
   })
+  const [hostels, setHostels] = useState<Hostel[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock hostel data
-  const hostels = [
-    { _id: '1', name: 'Hostel A' },
-    { _id: '2', name: 'Hostel B' },
-    { _id: '3', name: 'Hostel C' }
-  ];
+  useEffect(() => {
+    // Fetch hostels from API
+    const fetchHostels = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/hostels');
+        if (!response.ok) {
+          throw new Error('Failed to fetch hostels');
+        }
+        const data = await response.json();
+        console.log('Fetched hostels:', data); // Debug log
+        setHostels(data);
+      } catch (error) {
+        console.error('Error fetching hostels:', error);
+      }
+    };
+
+    fetchHostels();
+  }, []);
 
   useEffect(() => {
     // Check if user is logged in
@@ -84,25 +98,43 @@ export function NavBar({ items = [], className }: NavBarProps) {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      // Create mock user data with default values
-      const mockUser = {
-        id: '1',
-        name: loginData.name || 'Test User',
-        email: loginData.email || 'test@example.com',
-        hostel: {
-          id: loginData.hostelId || '1',
-          name: hostels.find(h => h._id === loginData.hostelId)?.name || 'Hostel A'
-        }
-      };
+      const response = await fetch('http://localhost:5001/api/students/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: loginData.email,
+          password: loginData.password,
+          hostelId: loginData.hostelId,
+        }),
+      });
 
-      // Store mock user data in localStorage
-      localStorage.setItem("studentData", JSON.stringify(mockUser));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const data = await response.json();
+      
+      // Store the complete student data
+      localStorage.setItem('studentData', JSON.stringify({
+        id: data.student._id,
+        name: data.student.name,
+        email: data.student.email,
+        hostel: {
+          id: data.student.hostelId,
+          name: hostels.find(h => h._id === data.student.hostelId)?.name
+        }
+      }));
+      localStorage.setItem('studentToken', data.token);
+      
       setIsLoggedIn(true);
       setShowLoginForm(false);
-      // Use Next.js router for navigation instead of window.location
       window.location.href = '/user/home';
     } catch (error) {
       console.error('Login error:', error);
+      setError(error instanceof Error ? error.message : 'Login failed');
     }
   }
 
@@ -200,6 +232,11 @@ export function NavBar({ items = [], className }: NavBarProps) {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLoginForm(false)} />
           <div className="relative bg-background/95 p-8 rounded-2xl shadow-xl w-full max-w-md border border-border/50 backdrop-blur-xl">
             <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">Login</h2>
+            {error && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label htmlFor="hostel" className="block text-sm font-medium mb-1 text-foreground/70">

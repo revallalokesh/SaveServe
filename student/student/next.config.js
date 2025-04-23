@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    PORT: process.env.PORT || 3000
+    PORT: process.env.PORT || 3002
   },
   experimental: {
     serverActions: true

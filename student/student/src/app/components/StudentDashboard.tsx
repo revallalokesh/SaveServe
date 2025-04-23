@@ -21,9 +21,18 @@ const StudentDashboard: React.FC = () => {
   useEffect(() => {
     const data = localStorage.getItem('studentData');
     if (data) {
-      setStudentData(JSON.parse(data));
+      try {
+        const parsedData = JSON.parse(data);
+        console.log('Loaded student data:', parsedData); // Debug log
+        setStudentData(parsedData);
+      } catch (error) {
+        console.error('Error parsing student data:', error);
+        router.push('/'); // Redirect to login if data is invalid
+      }
+    } else {
+      router.push('/'); // Redirect to login if no data
     }
-  }, []);
+  }, [router]);
 
   if (!studentData) {
     return null;

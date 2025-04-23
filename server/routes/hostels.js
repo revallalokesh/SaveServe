@@ -3,10 +3,11 @@ const router = express.Router();
 const Hostel = require('../models/Hostel');
 const auth = require('../middleware/auth');
 
-// Get all hostels
-router.get('/', auth, async (req, res) => {
+// Get all hostels (public route)
+router.get('/', async (req, res) => {
   try {
     const hostels = await Hostel.find()
+      .select('name') // Only return hostel name and ID
       .sort({ createdAt: -1 })
       .lean();
     res.json(hostels);
