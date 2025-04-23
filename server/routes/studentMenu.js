@@ -53,43 +53,6 @@ router.get('/:hostelId', async (req, res) => {
   }
 });
 
-// Get student's meal selections for today
-router.get('/selections/:studentId', auth, async (req, res) => {
-  try {
-    const { studentId } = req.params;
-    const today = new Date().toISOString().split('T')[0];
-
-    const selections = await MealSelection.findOne({
-      studentId,
-      date: today
-    }).lean();
-
-    if (selections) {
-      // Format the response to match the frontend expectations
-      const formattedSelections = {
-        ...selections,
-        meals: {
-          breakfast: selections.meals.breakfast || { selected: false, qrCode: null, used: false },
-          lunch: selections.meals.lunch || { selected: false, qrCode: null, used: false },
-          dinner: selections.meals.dinner || { selected: false, qrCode: null, used: false }
-        }
-      };
-      res.json(formattedSelections);
-    } else {
-      res.json({ 
-        meals: { 
-          breakfast: { selected: false, qrCode: null, used: false },
-          lunch: { selected: false, qrCode: null, used: false },
-          dinner: { selected: false, qrCode: null, used: false }
-        } 
-      });
-    }
-  } catch (error) {
-    console.error('[Server] Error fetching meal selections:', error);
-    res.status(500).json({ error: 'Error fetching meal selections' });
-  }
-});
-
 // Submit meal selections for a student
 router.post('/select', auth, async (req, res) => {
   try {
@@ -117,19 +80,12 @@ router.post('/select', auth, async (req, res) => {
 
     // Check if any meal is being resubmitted
     if (mealSelection) {
-      const selectedMeal = Object.entries(selections).find(([_, selected]) => selected)?.[0];
-      if (selectedMeal && mealSelection.meals[selectedMeal].selected) {
-        // If the meal was already selected, return the existing QR code
-        return res.json({
-          message: `${selectedMeal.charAt(0).toUpperCase() + selectedMeal.slice(1)} was already selected`,
-          qrCodes: {
-            [selectedMeal]: mealSelection.meals[selectedMeal].qrCode
-          },
-          studentDetails: {
-            name: mealSelection.studentName,
-            email: mealSelection.studentEmail
-          }
-        });
+      for (const [meal, selected] of Object.entries(selections)) {
+        if (selected && mealSelection.meals[meal].selected) {
+          return res.status(400).json({ 
+            error: `${meal.charAt(0).toUpperCase() + meal.slice(1)} has already been submitted for today` 
+          });
+        }
       }
     }
 
@@ -142,7 +98,7 @@ router.post('/select', auth, async (req, res) => {
 
     // Update only the selected meal
     for (const [meal, selected] of Object.entries(selections)) {
-      if (selected && !meals[meal].selected) {
+      if (selected) {
         meals[meal] = {
           selected: true,
           qrCode: generateQRCode(studentId, hostelId, meal, today),
@@ -199,7 +155,15 @@ router.post('/select', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('[Server] Error saving meal selections:', error);
-    res.status(500).json({ error: 'Error saving meal selections' });
+    console.error('[Server] Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'Error saving meal selections',
+      details: error.message 
+    });
   }
 });
 
@@ -235,6 +199,24 @@ router.post('/validate-qr', auth, async (req, res) => {
   } catch (error) {
     console.error('[Server] Error validating QR code:', error);
     res.status(500).json({ error: 'Error validating QR code' });
+  }
+});
+
+// Get student's meal selections for today
+router.get('/selections/:studentId', auth, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const today = new Date().toISOString().split('T')[0];
+
+    const selections = await MealSelection.findOne({
+      studentId,
+      date: today
+    });
+
+    res.json(selections || { meals: { breakfast: {}, lunch: {}, dinner: {} } });
+  } catch (error) {
+    console.error('[Server] Error fetching meal selections:', error);
+    res.status(500).json({ error: 'Error fetching meal selections' });
   }
 });
 

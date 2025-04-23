@@ -83,62 +83,10 @@ const StudentMenu: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [hostelId, setHostelId] = useState<string | null>(null);
-  const [studentId, setStudentId] = useState<string | null>(null);
 
   // Add helper function to safely get menu items
   const getMealItems = (day: string, type: 'breakfast' | 'lunch' | 'dinner'): string[] => {
     return weeklyMenu[day]?.[type] || [];
-  };
-
-  // Add function to fetch existing meal selections
-  const fetchExistingSelections = async () => {
-    try {
-      const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
-      const studentId = studentData.id;
-      
-      if (!studentId) {
-        throw new Error('Student information not found');
-      }
-
-      const response = await fetch(`http://localhost:5001/api/student-menu/selections/${studentId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch meal selections');
-      }
-
-      const data = await response.json();
-      
-      if (data && data.meals) {
-        // Update meal options with existing selections
-        setMealOptions(prev => ({
-          breakfast: {
-            opted: data.meals.breakfast?.selected || false,
-            locked: data.meals.breakfast?.selected || false,
-            submitted: data.meals.breakfast?.selected || false,
-            qrCode: data.meals.breakfast?.qrCode || null
-          },
-          lunch: {
-            opted: data.meals.lunch?.selected || false,
-            locked: data.meals.lunch?.selected || false,
-            submitted: data.meals.lunch?.selected || false,
-            qrCode: data.meals.lunch?.qrCode || null
-          },
-          dinner: {
-            opted: data.meals.dinner?.selected || false,
-            locked: data.meals.dinner?.selected || false,
-            submitted: data.meals.dinner?.selected || false,
-            qrCode: data.meals.dinner?.qrCode || null
-          }
-        }));
-      }
-    } catch (err) {
-      console.error('Error fetching existing selections:', err);
-      // Don't set error state here as this is not a critical failure
-    }
   };
 
   useEffect(() => {
@@ -149,9 +97,6 @@ const StudentMenu: React.FC = () => {
         const studentData = JSON.parse(studentDataString);
         if (studentData && studentData.hostel && studentData.hostel.id) {
           setHostelId(studentData.hostel.id);
-          setStudentId(studentData.id);
-          // Fetch existing selections after setting student data
-          fetchExistingSelections();
         } else {
           setError('Hostel information not found in your profile.');
           setLoading(false);
@@ -164,8 +109,10 @@ const StudentMenu: React.FC = () => {
     } else {
       setError('You must be logged in to view the menu.');
       setLoading(false);
+      // Optionally redirect to login
+      // router.push('/login');
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!hostelId) return;
