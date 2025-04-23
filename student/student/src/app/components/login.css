@@ -1,0 +1,186 @@
+/* Ant Design Form Overrides */
+.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: transparent !important;
+  border-radius: 12px !important;
+}
+
+.ant-select-selector {
+  border-radius: 12px !important;
+  height: 42px !important;
+  padding: 5px 16px !important;
+  border-color: rgba(var(--border-rgb), 0.5) !important;
+}
+
+.ant-select-selection-placeholder,
+.ant-select-selection-item {
+  line-height: 32px !important;
+}
+
+/* Animated Input Wrapper */
+.ant-input-affix-wrapper {
+  border-radius: 12px !important;
+  padding: 8px 16px !important;
+  border: none !important;
+  background: linear-gradient(to right, rgb(var(--background-rgb)), rgb(var(--background-rgb))) padding-box,
+              linear-gradient(90deg, rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.1)) border-box;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.ant-input-affix-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  background: linear-gradient(90deg, 
+    rgba(var(--primary-rgb), 0.5),
+    rgba(var(--primary-rgb), 0.2),
+    rgba(var(--primary-rgb), 0.5)
+  );
+  border-radius: 13px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.ant-input-affix-wrapper:hover::before {
+  background: linear-gradient(90deg, 
+    rgba(var(--primary-rgb), 0.7),
+    rgba(var(--primary-rgb), 0.3),
+    rgba(var(--primary-rgb), 0.7)
+  );
+}
+
+.ant-input-affix-wrapper-focused::before {
+  background: linear-gradient(90deg, 
+    rgba(var(--primary-rgb), 1),
+    rgba(var(--primary-rgb), 0.5),
+    rgba(var(--primary-rgb), 1)
+  );
+  animation: borderRotate 4s linear infinite;
+}
+
+@keyframes borderRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ant-input-affix-wrapper-focused {
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1) !important;
+}
+
+.ant-form-item-label > label {
+  font-weight: 500 !important;
+  color: rgba(var(--foreground-rgb), 0.7) !important;
+}
+
+/* Custom Animations */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-animation {
+  animation: fadeSlideIn 0.5s ease-out forwards;
+}
+
+/* Glass Effect */
+.glass-effect {
+  background: rgba(var(--background-rgb), 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(var(--border-rgb), 0.5);
+}
+
+/* Input Focus Effect */
+.ant-input:focus,
+.ant-input-password:focus {
+  box-shadow: none !important;
+}
+
+/* Select Focus Effect */
+.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  border-color: transparent !important;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1) !important;
+  background: linear-gradient(to right, rgb(var(--background-rgb)), rgb(var(--background-rgb))) padding-box,
+              linear-gradient(90deg, rgba(var(--primary-rgb), 1), rgba(var(--primary-rgb), 0.5), rgba(var(--primary-rgb), 1)) border-box;
+}
+
+/* Button Styles */
+.ant-btn.ant-btn-primary {
+  border: none !important;
+  position: relative;
+  background: linear-gradient(90deg, 
+    rgba(var(--primary-rgb), 1),
+    rgba(var(--primary-rgb), 0.8),
+    rgba(var(--primary-rgb), 1)
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: gradientMove 3s linear infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: -100% 0%;
+  }
+}
+
+.ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.25);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .ant-form {
+    padding: 16px;
+  }
+  
+  .ant-input-affix-wrapper,
+  .ant-select-selector {
+    height: 38px !important;
+  }
+}
+
+/* Password Input Specific Styles */
+.ant-input-password {
+  background: transparent !important;
+}
+
+.ant-input-password input {
+  background: transparent !important;
+}
+
+/* Select Dropdown Styles */
+.ant-select-dropdown {
+  backdrop-filter: blur(16px);
+  background: rgba(var(--background-rgb), 0.8) !important;
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ant-select-item {
+  transition: all 0.3s ease !important;
+}
+
+.ant-select-item-option-selected {
+  background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+.ant-select-item-option-active {
+  background: rgba(var(--primary-rgb), 0.05) !important;
+} 
