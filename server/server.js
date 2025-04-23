@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const hostelRoutes = require('./routes/hostels');
 const ownerRoutes = require('./routes/owner');
+const studentRoutes = require('./routes/students');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -52,6 +53,7 @@ app.use('/api', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/hostels', hostelRoutes);
 app.use('/api/owner', ownerRoutes);
+app.use('/api/students', studentRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

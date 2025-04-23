@@ -1,55 +1,117 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Table, Button, Modal, Form, Input, message } from "antd"
 import { PlusOutlined, KeyOutlined } from "@ant-design/icons"
 
 interface Student {
-  id: string
+  _id: string
   name: string
   email: string
+  createdAt: string
 }
 
-// Temporary student data
-const mockStudents: Student[] = [
-  { id: "1", name: "John Doe", email: "john@example.com" },
-  { id: "2", name: "Jane Smith", email: "jane@example.com" },
-  { id: "3", name: "Mike Johnson", email: "mike@example.com" },
-  { id: "4", name: "Sarah Williams", email: "sarah@example.com" },
-  { id: "5", name: "David Brown", email: "david@example.com" },
-]
-
 export function StudentManagement() {
-  const [students, setStudents] = useState<Student[]>(mockStudents)
+  const [students, setStudents] = useState<Student[]>([])
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false)
   const [isResetModalVisible, setIsResetModalVisible] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [loading, setLoading] = useState(true)
   const [form] = Form.useForm()
 
-  const handleRegister = async (values: { email: string; password: string }) => {
+  const fetchStudents = async () => {
     try {
-      // Add new student to the temporary list
-      const newStudent = {
-        id: Date.now().toString(),
-        name: values.email.split("@")[0], // Mock name from email
-        email: values.email,
+      const token = localStorage.getItem('token')
+      if (!token) {
+        message.error('Please login first')
+        return
       }
-      setStudents([...students, newStudent])
-      message.success("Student registered successfully")
+      
+      const response = await fetch('http://localhost:5001/api/students', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch students')
+      }
+      
+      const data = await response.json()
+      setStudents(data)
+    } catch (error) {
+      message.error('Failed to fetch students')
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchStudents()
+  }, [])
+
+  const handleRegister = async (values: { name: string; email: string; password: string }) => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        message.error('Please login first')
+        return
+      }
+
+      const response = await fetch('http://localhost:5001/api/students/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(values)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to register student')
+      }
+
+      await fetchStudents()
+      message.success('Student registered successfully')
       setIsRegisterModalVisible(false)
       form.resetFields()
     } catch (error) {
-      message.error("Failed to register student")
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('Failed to register student')
+      }
     }
   }
 
   const handleResetPassword = async (values: { newPassword: string }) => {
     try {
-      // In a real app, this would call an API to reset the password
+      const token = localStorage.getItem('token')
+      if (!token) {
+        message.error('Please login first')
+        return
+      }
+
+      const response = await fetch(`http://localhost:5001/api/students/${selectedStudent?._id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newPassword: values.newPassword })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reset password')
+      }
+
       message.success(`Password reset for ${selectedStudent?.email}`)
       setIsResetModalVisible(false)
     } catch (error) {
-      message.error("Failed to reset password")
+      message.error('Failed to reset password')
+      console.error('Error:', error)
     }
   }
 
@@ -63,6 +125,12 @@ export function StudentManagement() {
       title: "Email",
       dataIndex: "email",
       key: "email",
+    },
+    {
+      title: "Registration Date",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleDateString()
     },
     {
       title: "Actions",
@@ -98,8 +166,9 @@ export function StudentManagement() {
       <Table 
         dataSource={students} 
         columns={columns} 
-        rowKey="id"
+        rowKey="_id"
         pagination={{ pageSize: 5 }}
+        loading={loading}
       />
 
       <Modal
@@ -112,6 +181,13 @@ export function StudentManagement() {
         footer={null}
       >
         <Form form={form} onFinish={handleRegister} layout="vertical">
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: "Please input student name" }]}
+          >
+            <Input placeholder="Enter student name" />
+          </Form.Item>
           <Form.Item
             name="email"
             label="Email"
