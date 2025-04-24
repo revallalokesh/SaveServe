@@ -261,35 +261,56 @@ router.post('/select', auth, async (req, res) => {
 // Validate and mark QR code as used
 router.post('/validate-qr', auth, async (req, res) => {
   try {
-    const { studentId, qrCode, meal } = req.body;
-    const today = new Date().toISOString().split('T')[0];
+    const { qrCode } = req.body;
 
-    const mealSelection = await MealSelection.findOne({
-      studentId,
-      date: today,
-      [`meals.${meal}.qrCode`]: qrCode,
-      [`meals.${meal}.used`]: false
-    });
-
-    if (!mealSelection) {
-      return res.status(404).json({ error: 'Invalid or expired QR code' });
+    if (!qrCode) {
+      return res.status(400).json({ error: 'QR code is required' });
     }
 
-    // Check if meal time has expired
-    const mealExpiry = getMealExpiryTime(meal, today);
-    if (new Date() > mealExpiry) {
-      return res.status(400).json({ error: 'Meal time has expired' });
+    // Find the menu item with the matching QR code in any meal type
+    const menuItem = await MealSelection.findOne({
+      $or: [
+        { 'meals.breakfast.qrCode': qrCode },
+        { 'meals.lunch.qrCode': qrCode },
+        { 'meals.dinner.qrCode': qrCode }
+      ]
+    });
+
+    if (!menuItem) {
+      return res.status(404).json({ error: 'Invalid QR code' });
+    }
+
+    // Determine which meal type has this QR code
+    let mealType;
+    if (menuItem.meals.breakfast.qrCode === qrCode) mealType = 'breakfast';
+    else if (menuItem.meals.lunch.qrCode === qrCode) mealType = 'lunch';
+    else if (menuItem.meals.dinner.qrCode === qrCode) mealType = 'dinner';
+
+    // Check if QR code has already been used
+    if (menuItem.meals[mealType].used) {
+      return res.status(400).json({
+        error: 'QR code has already been used',
+        studentName: menuItem.studentName,
+        mealType: mealType,
+        usedAt: menuItem.meals[mealType].usedAt
+      });
     }
 
     // Mark QR code as used
-    mealSelection.meals[meal].used = true;
-    mealSelection.meals[meal].usedAt = new Date();
-    await mealSelection.save();
+    menuItem.meals[mealType].used = true;
+    menuItem.meals[mealType].usedAt = new Date();
+    await menuItem.save();
 
-    res.json({ message: 'QR code validated successfully' });
+    return res.json({
+      success: true,
+      message: 'QR code validated successfully',
+      studentName: menuItem.studentName,
+      mealType: mealType,
+      usedAt: menuItem.meals[mealType].usedAt
+    });
   } catch (error) {
-    console.error('[Server] Error validating QR code:', error);
-    res.status(500).json({ error: 'Error validating QR code' });
+    console.error('Error validating QR code:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

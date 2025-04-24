@@ -11,39 +11,46 @@ interface MealStatus {
   studentEmail: string
   meals: {
     breakfast: {
-      opted: boolean
+      selected: boolean
       qrCode: string | null
       used: boolean
       usedAt: string | null
+      submittedAt: string | null
     }
     lunch: {
-      opted: boolean
+      selected: boolean
       qrCode: string | null
       used: boolean
       usedAt: string | null
+      submittedAt: string | null
     }
     dinner: {
-      opted: boolean
+      selected: boolean
       qrCode: string | null
       used: boolean
       usedAt: string | null
+      submittedAt: string | null
     }
   }
+  dayOfWeek?: string
+  createdAt?: string
+  updatedAt?: string
+  expiresAt?: string
 }
 
 interface MealStats {
   date: string
   breakfast: {
-    opted: number
-    notOpted: number
+    selected: number
+    notSelected: number
   }
   lunch: {
-    opted: number
-    notOpted: number
+    selected: number
+    notSelected: number
   }
   dinner: {
-    opted: number
-    notOpted: number
+    selected: number
+    notSelected: number
   }
 }
 
@@ -100,28 +107,28 @@ export function Analytics() {
     const totalStudents = mealStatus.length
     const stats: MealStats = {
       date: selectedDate.format('YYYY-MM-DD'),
-      breakfast: { opted: 0, notOpted: 0 },
-      lunch: { opted: 0, notOpted: 0 },
-      dinner: { opted: 0, notOpted: 0 }
+      breakfast: { selected: 0, notSelected: 0 },
+      lunch: { selected: 0, notSelected: 0 },
+      dinner: { selected: 0, notSelected: 0 }
     }
 
     mealStatus.forEach(status => {
-      if (status.meals.breakfast.opted) stats.breakfast.opted++
-      else stats.breakfast.notOpted++
+      if (status.meals.breakfast.selected) stats.breakfast.selected++
+      else stats.breakfast.notSelected++
       
-      if (status.meals.lunch.opted) stats.lunch.opted++
-      else stats.lunch.notOpted++
+      if (status.meals.lunch.selected) stats.lunch.selected++
+      else stats.lunch.notSelected++
       
-      if (status.meals.dinner.opted) stats.dinner.opted++
-      else stats.dinner.notOpted++
+      if (status.meals.dinner.selected) stats.dinner.selected++
+      else stats.dinner.notSelected++
     })
 
     return stats
   }
 
-  const getPieData = (opted: number, notOpted: number) => [
-    { name: 'Opted', value: opted },
-    { name: 'Not Opted', value: notOpted }
+  const getPieData = (selected: number, notSelected: number) => [
+    { name: 'Selected', value: selected },
+    { name: 'Not Selected', value: notSelected }
   ]
 
   const studentColumns = [
@@ -129,71 +136,94 @@ export function Analytics() {
       title: 'Name',
       dataIndex: 'studentName',
       key: 'studentName',
+      width: '20%',
+      render: (name: string) => (
+        <span className="font-medium">{name}</span>
+      )
     },
     {
       title: 'Email',
       dataIndex: 'studentEmail',
       key: 'studentEmail',
+      width: '20%',
     },
     {
       title: 'Breakfast',
-      dataIndex: ['meals', 'breakfast', 'opted'],
+      dataIndex: ['meals', 'breakfast'],
       key: 'breakfast',
-      render: (opted: boolean, record: MealStatus) => (
-        <div>
-          <span style={{ color: opted ? 'green' : 'red' }}>
-            {opted ? 'Opted' : 'Not Opted'}
+      width: '20%',
+      render: (breakfast: any, record: MealStatus) => (
+        <div className="flex flex-col items-center gap-2">
+          <span style={{ color: breakfast.selected ? 'green' : 'red' }} className="font-medium">
+            {breakfast.selected ? 'Selected' : 'Not Selected'}
           </span>
-          {opted && record.meals.breakfast.qrCode && (
-            <div className="mt-1">
+          {breakfast.selected && breakfast.qrCode && (
+            <div className="mt-2">
               <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.breakfast.qrCode}`} 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${breakfast.qrCode}`} 
                 alt="Breakfast QR Code"
-                className="w-8 h-8"
+                className="w-24 h-24 border border-gray-200 rounded-lg shadow-sm"
               />
             </div>
+          )}
+          {breakfast.used && (
+            <span className="text-sm text-gray-500">
+              Used at: {new Date(breakfast.usedAt!).toLocaleString()}
+        </span>
           )}
         </div>
       ),
     },
     {
       title: 'Lunch',
-      dataIndex: ['meals', 'lunch', 'opted'],
+      dataIndex: ['meals', 'lunch'],
       key: 'lunch',
-      render: (opted: boolean, record: MealStatus) => (
-        <div>
-          <span style={{ color: opted ? 'green' : 'red' }}>
-            {opted ? 'Opted' : 'Not Opted'}
+      width: '20%',
+      render: (lunch: any, record: MealStatus) => (
+        <div className="flex flex-col items-center gap-2">
+          <span style={{ color: lunch.selected ? 'green' : 'red' }} className="font-medium">
+            {lunch.selected ? 'Selected' : 'Not Selected'}
           </span>
-          {opted && record.meals.lunch.qrCode && (
-            <div className="mt-1">
+          {lunch.selected && lunch.qrCode && (
+            <div className="mt-2">
               <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.lunch.qrCode}`} 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${lunch.qrCode}`} 
                 alt="Lunch QR Code"
-                className="w-8 h-8"
+                className="w-24 h-24 border border-gray-200 rounded-lg shadow-sm"
               />
             </div>
+          )}
+          {lunch.used && (
+            <span className="text-sm text-gray-500">
+              Used at: {new Date(lunch.usedAt!).toLocaleString()}
+        </span>
           )}
         </div>
       ),
     },
     {
       title: 'Dinner',
-      dataIndex: ['meals', 'dinner', 'opted'],
+      dataIndex: ['meals', 'dinner'],
       key: 'dinner',
-      render: (opted: boolean, record: MealStatus) => (
-        <div>
-          <span style={{ color: opted ? 'green' : 'red' }}>
-            {opted ? 'Opted' : 'Not Opted'}
+      width: '20%',
+      render: (dinner: any, record: MealStatus) => (
+        <div className="flex flex-col items-center gap-2">
+          <span style={{ color: dinner.selected ? 'green' : 'red' }} className="font-medium">
+            {dinner.selected ? 'Selected' : 'Not Selected'}
           </span>
-          {opted && record.meals.dinner.qrCode && (
-            <div className="mt-1">
+          {dinner.selected && dinner.qrCode && (
+            <div className="mt-2">
               <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.dinner.qrCode}`} 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${dinner.qrCode}`} 
                 alt="Dinner QR Code"
-                className="w-8 h-8"
+                className="w-24 h-24 border border-gray-200 rounded-lg shadow-sm"
               />
             </div>
+          )}
+          {dinner.used && (
+            <span className="text-sm text-gray-500">
+              Used at: {new Date(dinner.usedAt!).toLocaleString()}
+        </span>
           )}
         </div>
       ),
@@ -258,7 +288,7 @@ export function Analytics() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={getPieData(currentStats.breakfast.opted, currentStats.breakfast.notOpted)}
+                  data={getPieData(currentStats.breakfast.selected, currentStats.breakfast.notSelected)}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -266,7 +296,7 @@ export function Analytics() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {getPieData(currentStats.breakfast.opted, currentStats.breakfast.notOpted).map((entry, index) => (
+                  {getPieData(currentStats.breakfast.selected, currentStats.breakfast.notSelected).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -281,7 +311,7 @@ export function Analytics() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={getPieData(currentStats.lunch.opted, currentStats.lunch.notOpted)}
+                  data={getPieData(currentStats.lunch.selected, currentStats.lunch.notSelected)}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -289,7 +319,7 @@ export function Analytics() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {getPieData(currentStats.lunch.opted, currentStats.lunch.notOpted).map((entry, index) => (
+                  {getPieData(currentStats.lunch.selected, currentStats.lunch.notSelected).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -304,7 +334,7 @@ export function Analytics() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={getPieData(currentStats.dinner.opted, currentStats.dinner.notOpted)}
+                  data={getPieData(currentStats.dinner.selected, currentStats.dinner.notSelected)}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -312,7 +342,7 @@ export function Analytics() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {getPieData(currentStats.dinner.opted, currentStats.dinner.notOpted).map((entry, index) => (
+                  {getPieData(currentStats.dinner.selected, currentStats.dinner.notSelected).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -342,6 +372,8 @@ export function Analytics() {
           columns={studentColumns}
           rowKey="studentEmail"
           pagination={false}
+          scroll={{ x: 1200 }}
+          className="overflow-x-auto"
         />
       </Card>
     </div>

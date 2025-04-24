@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///Users/psbharathkumarachari/save_serve_complete/owner/owner/src/app/login/page.tsx"],"sourcesContent":["\"use client\"\n\nimport { OwnerLogin } from '../components/OwnerLogin'\n\nexport default function LoginPage() {\n  return (\n    <div className=\"min-h-screen flex items-center justify-center bg-gray-50\">\n      <div className=\"max-w-md w-full\">\n        <OwnerLogin />\n      </div>\n    </div>\n  )\n} "],"names":[],"mappings":";;;;AAEA;AAFA;;;AAIe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAU;kBACb,cAAA,8OAAC;YAAI,WAAU;sBACb,cAAA,8OAAC,uIAAA,CAAA,aAAU;;;;;;;;;;;;;;;AAInB","debugId":null}}]
+}

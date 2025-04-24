@@ -91,89 +91,112 @@ function Analytics() {
         const stats = {
             date: selectedDate.format('YYYY-MM-DD'),
             breakfast: {
-                opted: 0,
-                notOpted: 0
+                selected: 0,
+                notSelected: 0
             },
             lunch: {
-                opted: 0,
-                notOpted: 0
+                selected: 0,
+                notSelected: 0
             },
             dinner: {
-                opted: 0,
-                notOpted: 0
+                selected: 0,
+                notSelected: 0
             }
         };
         mealStatus.forEach((status)=>{
-            if (status.meals.breakfast.opted) stats.breakfast.opted++;
-            else stats.breakfast.notOpted++;
-            if (status.meals.lunch.opted) stats.lunch.opted++;
-            else stats.lunch.notOpted++;
-            if (status.meals.dinner.opted) stats.dinner.opted++;
-            else stats.dinner.notOpted++;
+            if (status.meals.breakfast.selected) stats.breakfast.selected++;
+            else stats.breakfast.notSelected++;
+            if (status.meals.lunch.selected) stats.lunch.selected++;
+            else stats.lunch.notSelected++;
+            if (status.meals.dinner.selected) stats.dinner.selected++;
+            else stats.dinner.notSelected++;
         });
         return stats;
     };
-    const getPieData = (opted, notOpted)=>[
+    const getPieData = (selected, notSelected)=>[
             {
-                name: 'Opted',
-                value: opted
+                name: 'Selected',
+                value: selected
             },
             {
-                name: 'Not Opted',
-                value: notOpted
+                name: 'Not Selected',
+                value: notSelected
             }
         ];
     const studentColumns = [
         {
             title: 'Name',
             dataIndex: 'studentName',
-            key: 'studentName'
+            key: 'studentName',
+            width: '20%',
+            render: (name)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                    className: "font-medium",
+                    children: name
+                }, void 0, false, {
+                    fileName: "[project]/src/app/components/Analytics.tsx",
+                    lineNumber: 141,
+                    columnNumber: 9
+                }, this)
         },
         {
             title: 'Email',
             dataIndex: 'studentEmail',
-            key: 'studentEmail'
+            key: 'studentEmail',
+            width: '20%'
         },
         {
             title: 'Breakfast',
             dataIndex: [
                 'meals',
-                'breakfast',
-                'opted'
+                'breakfast'
             ],
             key: 'breakfast',
-            render: (opted, record)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            width: '20%',
+            render: (breakfast, record)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex flex-col items-center gap-2",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             style: {
-                                color: opted ? 'green' : 'red'
+                                color: breakfast.selected ? 'green' : 'red'
                             },
-                            children: opted ? 'Opted' : 'Not Opted'
+                            className: "font-medium",
+                            children: breakfast.selected ? 'Selected' : 'Not Selected'
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 144,
+                            lineNumber: 157,
                             columnNumber: 11
                         }, this),
-                        opted && record.meals.breakfast.qrCode && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "mt-1",
+                        breakfast.selected && breakfast.qrCode && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "mt-2",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                                src: `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.breakfast.qrCode}`,
+                                src: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${breakfast.qrCode}`,
                                 alt: "Breakfast QR Code",
-                                className: "w-8 h-8"
+                                className: "w-24 h-24 border border-gray-200 rounded-lg shadow-sm"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 149,
+                                lineNumber: 162,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 148,
+                            lineNumber: 161,
+                            columnNumber: 13
+                        }, this),
+                        breakfast.used && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            className: "text-sm text-gray-500",
+                            children: [
+                                "Used at: ",
+                                new Date(breakfast.usedAt).toLocaleString()
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/app/components/Analytics.tsx",
+                            lineNumber: 170,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/components/Analytics.tsx",
-                    lineNumber: 143,
+                    lineNumber: 156,
                     columnNumber: 9
                 }, this)
         },
@@ -181,42 +204,55 @@ function Analytics() {
             title: 'Lunch',
             dataIndex: [
                 'meals',
-                'lunch',
-                'opted'
+                'lunch'
             ],
             key: 'lunch',
-            render: (opted, record)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            width: '20%',
+            render: (lunch, record)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex flex-col items-center gap-2",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             style: {
-                                color: opted ? 'green' : 'red'
+                                color: lunch.selected ? 'green' : 'red'
                             },
-                            children: opted ? 'Opted' : 'Not Opted'
+                            className: "font-medium",
+                            children: lunch.selected ? 'Selected' : 'Not Selected'
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 165,
+                            lineNumber: 184,
                             columnNumber: 11
                         }, this),
-                        opted && record.meals.lunch.qrCode && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "mt-1",
+                        lunch.selected && lunch.qrCode && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "mt-2",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                                src: `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.lunch.qrCode}`,
+                                src: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${lunch.qrCode}`,
                                 alt: "Lunch QR Code",
-                                className: "w-8 h-8"
+                                className: "w-24 h-24 border border-gray-200 rounded-lg shadow-sm"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 170,
+                                lineNumber: 189,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 169,
+                            lineNumber: 188,
+                            columnNumber: 13
+                        }, this),
+                        lunch.used && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            className: "text-sm text-gray-500",
+                            children: [
+                                "Used at: ",
+                                new Date(lunch.usedAt).toLocaleString()
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/app/components/Analytics.tsx",
+                            lineNumber: 197,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/components/Analytics.tsx",
-                    lineNumber: 164,
+                    lineNumber: 183,
                     columnNumber: 9
                 }, this)
         },
@@ -224,42 +260,55 @@ function Analytics() {
             title: 'Dinner',
             dataIndex: [
                 'meals',
-                'dinner',
-                'opted'
+                'dinner'
             ],
             key: 'dinner',
-            render: (opted, record)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            width: '20%',
+            render: (dinner, record)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex flex-col items-center gap-2",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             style: {
-                                color: opted ? 'green' : 'red'
+                                color: dinner.selected ? 'green' : 'red'
                             },
-                            children: opted ? 'Opted' : 'Not Opted'
+                            className: "font-medium",
+                            children: dinner.selected ? 'Selected' : 'Not Selected'
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 186,
+                            lineNumber: 211,
                             columnNumber: 11
                         }, this),
-                        opted && record.meals.dinner.qrCode && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "mt-1",
+                        dinner.selected && dinner.qrCode && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "mt-2",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                                src: `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.dinner.qrCode}`,
+                                src: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${dinner.qrCode}`,
                                 alt: "Dinner QR Code",
-                                className: "w-8 h-8"
+                                className: "w-24 h-24 border border-gray-200 rounded-lg shadow-sm"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 191,
+                                lineNumber: 216,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 190,
+                            lineNumber: 215,
+                            columnNumber: 13
+                        }, this),
+                        dinner.used && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            className: "text-sm text-gray-500",
+                            children: [
+                                "Used at: ",
+                                new Date(dinner.usedAt).toLocaleString()
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/app/components/Analytics.tsx",
+                            lineNumber: 224,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/components/Analytics.tsx",
-                    lineNumber: 185,
+                    lineNumber: 210,
                     columnNumber: 9
                 }, this)
         }
@@ -281,12 +330,12 @@ function Analytics() {
                 size: "large"
             }, void 0, false, {
                 fileName: "[project]/src/app/components/Analytics.tsx",
-                lineNumber: 220,
+                lineNumber: 250,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/components/Analytics.tsx",
-            lineNumber: 219,
+            lineNumber: 249,
             columnNumber: 7
         }, this);
     }
@@ -298,7 +347,7 @@ function Analytics() {
                 children: error
             }, void 0, false, {
                 fileName: "[project]/src/app/components/Analytics.tsx",
-                lineNumber: 228,
+                lineNumber: 258,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -309,7 +358,7 @@ function Analytics() {
                         children: "Meal Analytics"
                     }, void 0, false, {
                         fileName: "[project]/src/app/components/Analytics.tsx",
-                        lineNumber: 234,
+                        lineNumber: 264,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -326,7 +375,7 @@ function Analytics() {
                                     }))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 236,
+                                lineNumber: 266,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$select$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Select$3e$__["Select"], {
@@ -340,19 +389,19 @@ function Analytics() {
                                     }))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 244,
+                                lineNumber: 274,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/components/Analytics.tsx",
-                        lineNumber: 235,
+                        lineNumber: 265,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/components/Analytics.tsx",
-                lineNumber: 233,
+                lineNumber: 263,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$row$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Row$3e$__["Row"], {
@@ -371,54 +420,54 @@ function Analytics() {
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PieChart"], {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Pie"], {
-                                            data: getPieData(currentStats.breakfast.opted, currentStats.breakfast.notOpted),
+                                            data: getPieData(currentStats.breakfast.selected, currentStats.breakfast.notSelected),
                                             cx: "50%",
                                             cy: "50%",
                                             labelLine: false,
                                             outerRadius: 80,
                                             fill: "#8884d8",
                                             dataKey: "value",
-                                            children: getPieData(currentStats.breakfast.opted, currentStats.breakfast.notOpted).map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Cell"], {
+                                            children: getPieData(currentStats.breakfast.selected, currentStats.breakfast.notSelected).map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Cell"], {
                                                     fill: COLORS[index % COLORS.length]
                                                 }, `cell-${index}`, false, {
                                                     fileName: "[project]/src/app/components/Analytics.tsx",
-                                                    lineNumber: 270,
+                                                    lineNumber: 300,
                                                     columnNumber: 21
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 260,
+                                            lineNumber: 290,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {}, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 273,
+                                            lineNumber: 303,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Legend"], {}, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 274,
+                                            lineNumber: 304,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/components/Analytics.tsx",
-                                    lineNumber: 259,
+                                    lineNumber: 289,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 258,
+                                lineNumber: 288,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 257,
+                            lineNumber: 287,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/components/Analytics.tsx",
-                        lineNumber: 256,
+                        lineNumber: 286,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$col$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Col$3e$__["Col"], {
@@ -431,54 +480,54 @@ function Analytics() {
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PieChart"], {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Pie"], {
-                                            data: getPieData(currentStats.lunch.opted, currentStats.lunch.notOpted),
+                                            data: getPieData(currentStats.lunch.selected, currentStats.lunch.notSelected),
                                             cx: "50%",
                                             cy: "50%",
                                             labelLine: false,
                                             outerRadius: 80,
                                             fill: "#8884d8",
                                             dataKey: "value",
-                                            children: getPieData(currentStats.lunch.opted, currentStats.lunch.notOpted).map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Cell"], {
+                                            children: getPieData(currentStats.lunch.selected, currentStats.lunch.notSelected).map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Cell"], {
                                                     fill: COLORS[index % COLORS.length]
                                                 }, `cell-${index}`, false, {
                                                     fileName: "[project]/src/app/components/Analytics.tsx",
-                                                    lineNumber: 293,
+                                                    lineNumber: 323,
                                                     columnNumber: 21
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 283,
+                                            lineNumber: 313,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {}, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 296,
+                                            lineNumber: 326,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Legend"], {}, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 297,
+                                            lineNumber: 327,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/components/Analytics.tsx",
-                                    lineNumber: 282,
+                                    lineNumber: 312,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 281,
+                                lineNumber: 311,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 280,
+                            lineNumber: 310,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/components/Analytics.tsx",
-                        lineNumber: 279,
+                        lineNumber: 309,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$col$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Col$3e$__["Col"], {
@@ -491,60 +540,60 @@ function Analytics() {
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PieChart"], {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Pie"], {
-                                            data: getPieData(currentStats.dinner.opted, currentStats.dinner.notOpted),
+                                            data: getPieData(currentStats.dinner.selected, currentStats.dinner.notSelected),
                                             cx: "50%",
                                             cy: "50%",
                                             labelLine: false,
                                             outerRadius: 80,
                                             fill: "#8884d8",
                                             dataKey: "value",
-                                            children: getPieData(currentStats.dinner.opted, currentStats.dinner.notOpted).map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Cell"], {
+                                            children: getPieData(currentStats.dinner.selected, currentStats.dinner.notSelected).map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Cell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Cell"], {
                                                     fill: COLORS[index % COLORS.length]
                                                 }, `cell-${index}`, false, {
                                                     fileName: "[project]/src/app/components/Analytics.tsx",
-                                                    lineNumber: 316,
+                                                    lineNumber: 346,
                                                     columnNumber: 21
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 306,
+                                            lineNumber: 336,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {}, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 319,
+                                            lineNumber: 349,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Legend"], {}, void 0, false, {
                                             fileName: "[project]/src/app/components/Analytics.tsx",
-                                            lineNumber: 320,
+                                            lineNumber: 350,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/components/Analytics.tsx",
-                                    lineNumber: 305,
+                                    lineNumber: 335,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/components/Analytics.tsx",
-                                lineNumber: 304,
+                                lineNumber: 334,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/components/Analytics.tsx",
-                            lineNumber: 303,
+                            lineNumber: 333,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/components/Analytics.tsx",
-                        lineNumber: 302,
+                        lineNumber: 332,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/components/Analytics.tsx",
-                lineNumber: 255,
+                lineNumber: 285,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$card$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Card$3e$__["Card"], {
@@ -559,12 +608,12 @@ function Analytics() {
                     }
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/Analytics.tsx",
-                    lineNumber: 328,
+                    lineNumber: 358,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/components/Analytics.tsx",
-                lineNumber: 327,
+                lineNumber: 357,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$antd$2f$es$2f$card$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Card$3e$__["Card"], {
@@ -573,21 +622,25 @@ function Analytics() {
                     dataSource: mealStatus,
                     columns: studentColumns,
                     rowKey: "studentEmail",
-                    pagination: false
+                    pagination: false,
+                    scroll: {
+                        x: 1200
+                    },
+                    className: "overflow-x-auto"
                 }, void 0, false, {
                     fileName: "[project]/src/app/components/Analytics.tsx",
-                    lineNumber: 340,
+                    lineNumber: 370,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/components/Analytics.tsx",
-                lineNumber: 339,
+                lineNumber: 369,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/components/Analytics.tsx",
-        lineNumber: 226,
+        lineNumber: 256,
         columnNumber: 5
     }, this);
 }
