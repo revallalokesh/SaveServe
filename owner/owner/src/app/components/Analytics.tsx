@@ -1,9 +1,35 @@
 "use client"
 
-import React, { useState } from "react"
-import { Card, Calendar, Table, Select, Row, Col } from "antd"
+import React, { useState, useEffect } from "react"
+import { Card, Calendar, Table, Select, Row, Col, Spin } from "antd"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 import dayjs from "dayjs"
+import axios from "axios"
+
+interface MealStatus {
+  studentName: string
+  studentEmail: string
+  meals: {
+    breakfast: {
+      opted: boolean
+      qrCode: string | null
+      used: boolean
+      usedAt: string | null
+    }
+    lunch: {
+      opted: boolean
+      qrCode: string | null
+      used: boolean
+      usedAt: string | null
+    }
+    dinner: {
+      opted: boolean
+      qrCode: string | null
+      used: boolean
+      usedAt: string | null
+    }
+  }
+}
 
 interface MealStats {
   date: string
@@ -21,48 +47,76 @@ interface MealStats {
   }
 }
 
-interface StudentMealStatus {
-  id: string
-  name: string
-  breakfast: boolean
-  lunch: boolean
-  dinner: boolean
-}
-
-// Temporary data
-const mockMealStats: MealStats[] = Array.from({ length: 30 }, (_, i) => ({
-  date: dayjs().subtract(i, 'day').format('YYYY-MM-DD'),
-  breakfast: {
-    opted: Math.floor(Math.random() * 50) + 20,
-    notOpted: Math.floor(Math.random() * 20) + 5
-  },
-  lunch: {
-    opted: Math.floor(Math.random() * 50) + 20,
-    notOpted: Math.floor(Math.random() * 20) + 5
-  },
-  dinner: {
-    opted: Math.floor(Math.random() * 50) + 20,
-    notOpted: Math.floor(Math.random() * 20) + 5
-  }
-}))
-
-const mockStudentStatus: StudentMealStatus[] = Array.from({ length: 10 }, (_, i) => ({
-  id: (i + 1).toString(),
-  name: `Student ${i + 1}`,
-  breakfast: Math.random() > 0.3,
-  lunch: Math.random() > 0.3,
-  dinner: Math.random() > 0.3
-}))
-
 const COLORS = ['#0088FE', '#FF8042']
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'
 
 export function Analytics() {
   const [selectedDate, setSelectedDate] = useState(dayjs())
   const [selectedMonth, setSelectedMonth] = useState(dayjs().month())
   const [selectedYear, setSelectedYear] = useState(dayjs().year())
+  const [mealStatus, setMealStatus] = useState<MealStatus[]>([])
+  const [loading, setLoading] = useState(false)
+  const [hostelId, setHostelId] = useState<string>("")
+  const [error, setError] = useState<string | null>(null)
 
-  const getMealStatsForDate = (date: string) => {
-    return mockMealStats.find(stat => stat.date === date) || mockMealStats[0]
+  useEffect(() => {
+    // Get hostel ID from localStorage
+    const storedHostelId = localStorage.getItem("hostelId")
+    if (storedHostelId) {
+      setHostelId(storedHostelId)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (hostelId) {
+      fetchMealStatus()
+    }
+  }, [hostelId, selectedDate])
+
+  const fetchMealStatus = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const token = localStorage.getItem('token')
+      const response = await axios.get(
+        `${API_BASE_URL}/student-meal-status/date/${selectedDate.format('YYYY-MM-DD')}?hostelId=${hostelId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      console.log('Meal status response:', response.data)
+      setMealStatus(response.data)
+    } catch (error) {
+      console.error('Error fetching meal status:', error)
+      setError('Failed to fetch meal status. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getMealStats = (): MealStats => {
+    const totalStudents = mealStatus.length
+    const stats: MealStats = {
+      date: selectedDate.format('YYYY-MM-DD'),
+      breakfast: { opted: 0, notOpted: 0 },
+      lunch: { opted: 0, notOpted: 0 },
+      dinner: { opted: 0, notOpted: 0 }
+    }
+
+    mealStatus.forEach(status => {
+      if (status.meals.breakfast.opted) stats.breakfast.opted++
+      else stats.breakfast.notOpted++
+      
+      if (status.meals.lunch.opted) stats.lunch.opted++
+      else stats.lunch.notOpted++
+      
+      if (status.meals.dinner.opted) stats.dinner.opted++
+      else stats.dinner.notOpted++
+    })
+
+    return stats
   }
 
   const getPieData = (opted: number, notOpted: number) => [
@@ -73,37 +127,75 @@ export function Analytics() {
   const studentColumns = [
     {
       title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'studentName',
+      key: 'studentName',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'studentEmail',
+      key: 'studentEmail',
     },
     {
       title: 'Breakfast',
-      dataIndex: 'breakfast',
+      dataIndex: ['meals', 'breakfast', 'opted'],
       key: 'breakfast',
-      render: (opted: boolean) => (
-        <span style={{ color: opted ? 'green' : 'red' }}>
-          {opted ? 'Opted' : 'Not Opted'}
-        </span>
+      render: (opted: boolean, record: MealStatus) => (
+        <div>
+          <span style={{ color: opted ? 'green' : 'red' }}>
+            {opted ? 'Opted' : 'Not Opted'}
+          </span>
+          {opted && record.meals.breakfast.qrCode && (
+            <div className="mt-1">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.breakfast.qrCode}`} 
+                alt="Breakfast QR Code"
+                className="w-8 h-8"
+              />
+            </div>
+          )}
+        </div>
       ),
     },
     {
       title: 'Lunch',
-      dataIndex: 'lunch',
+      dataIndex: ['meals', 'lunch', 'opted'],
       key: 'lunch',
-      render: (opted: boolean) => (
-        <span style={{ color: opted ? 'green' : 'red' }}>
-          {opted ? 'Opted' : 'Not Opted'}
-        </span>
+      render: (opted: boolean, record: MealStatus) => (
+        <div>
+          <span style={{ color: opted ? 'green' : 'red' }}>
+            {opted ? 'Opted' : 'Not Opted'}
+          </span>
+          {opted && record.meals.lunch.qrCode && (
+            <div className="mt-1">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.lunch.qrCode}`} 
+                alt="Lunch QR Code"
+                className="w-8 h-8"
+              />
+            </div>
+          )}
+        </div>
       ),
     },
     {
       title: 'Dinner',
-      dataIndex: 'dinner',
+      dataIndex: ['meals', 'dinner', 'opted'],
       key: 'dinner',
-      render: (opted: boolean) => (
-        <span style={{ color: opted ? 'green' : 'red' }}>
-          {opted ? 'Opted' : 'Not Opted'}
-        </span>
+      render: (opted: boolean, record: MealStatus) => (
+        <div>
+          <span style={{ color: opted ? 'green' : 'red' }}>
+            {opted ? 'Opted' : 'Not Opted'}
+          </span>
+          {opted && record.meals.dinner.qrCode && (
+            <div className="mt-1">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${record.meals.dinner.qrCode}`} 
+                alt="Dinner QR Code"
+                className="w-8 h-8"
+              />
+            </div>
+          )}
+        </div>
       ),
     },
   ]
@@ -120,10 +212,24 @@ export function Analytics() {
     setSelectedYear(year)
   }
 
-  const currentStats = getMealStatsForDate(selectedDate.format('YYYY-MM-DD'))
+  const currentStats = getMealStats()
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+      
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Meal Analytics</h2>
         <div className="flex gap-4">
@@ -232,9 +338,9 @@ export function Analytics() {
 
       <Card title={`Student Meal Status for ${selectedDate.format('MMMM D, YYYY')}`}>
         <Table
-          dataSource={mockStudentStatus}
+          dataSource={mealStatus}
           columns={studentColumns}
-          rowKey="id"
+          rowKey="studentEmail"
           pagination={false}
         />
       </Card>

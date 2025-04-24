@@ -140,6 +140,61 @@ const StudentMenu: React.FC = () => {
     fetchMenu();
   }, [hostelId]);
 
+  // Add new useEffect to fetch existing meal selections
+  useEffect(() => {
+    const fetchExistingSelections = async () => {
+      try {
+        const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
+        const studentId = studentData.id;
+        
+        if (!studentId) return;
+
+        const response = await fetch(`http://localhost:5001/api/student-menu/selections/${studentId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch existing selections');
+        }
+
+        const data = await response.json();
+        
+        if (data && data.meals) {
+          setMealOptions(prev => ({
+            ...prev,
+            breakfast: {
+              ...prev.breakfast,
+              opted: data.meals.breakfast?.selected || false,
+              locked: data.meals.breakfast?.selected || false,
+              submitted: data.meals.breakfast?.selected || false,
+              qrCode: data.meals.breakfast?.qrCode || null
+            },
+            lunch: {
+              ...prev.lunch,
+              opted: data.meals.lunch?.selected || false,
+              locked: data.meals.lunch?.selected || false,
+              submitted: data.meals.lunch?.selected || false,
+              qrCode: data.meals.lunch?.qrCode || null
+            },
+            dinner: {
+              ...prev.dinner,
+              opted: data.meals.dinner?.selected || false,
+              locked: data.meals.dinner?.selected || false,
+              submitted: data.meals.dinner?.selected || false,
+              qrCode: data.meals.dinner?.qrCode || null
+            }
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching existing selections:', error);
+      }
+    };
+
+    fetchExistingSelections();
+  }, []);
+
   function getCurrentDay(): string {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days[new Date().getDay()];
@@ -173,9 +228,31 @@ const StudentMenu: React.FC = () => {
       const studentName = studentData.name;
       const studentEmail = studentData.email;
 
-      if (!studentId || !hostelId || !studentName || !studentEmail) {
+      // Validate IDs
+      if (!studentId || !hostelId) {
+        throw new Error('Student or hostel ID not found');
+      }
+
+      // Validate ID format (24 character hex string)
+      const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
+      if (!isValidObjectId(studentId) || !isValidObjectId(hostelId)) {
+        throw new Error('Invalid student or hostel ID format');
+      }
+
+      if (!studentName || !studentEmail) {
         throw new Error('Student information not found');
       }
+
+      console.log('Submitting meal selection:', {
+        studentId,
+        hostelId,
+        studentName,
+        studentEmail,
+        dayOfWeek: selectedDay,
+        meal,
+        studentIdValid: isValidObjectId(studentId),
+        hostelIdValid: isValidObjectId(hostelId)
+      });
 
       const response = await fetch('http://localhost:5001/api/student-menu/select', {
         method: 'POST',
@@ -197,10 +274,12 @@ const StudentMenu: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Server error response:', errorData);
         throw new Error(errorData.error || 'Failed to submit meal selection');
       }
 
       const data = await response.json();
+      console.log('Success response:', data);
       
       setMealOptions(prev => ({
         ...prev,

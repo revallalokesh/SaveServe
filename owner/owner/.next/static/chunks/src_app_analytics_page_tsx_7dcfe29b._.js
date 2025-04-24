@@ -2,7 +2,7 @@
     script: typeof document === "object" ? document.currentScript : undefined,
     chunks: [
   "static/chunks/node_modules_antd_es_table_bbbeb8dd._.js",
-  "static/chunks/node_modules_antd_es_540628e8._.js",
+  "static/chunks/node_modules_antd_es_4cef94e6._.js",
   "static/chunks/node_modules_@ant-design_cssinjs_es_1bb39440._.js",
   "static/chunks/node_modules_rc-tabs_es_eb5572a2._.js",
   "static/chunks/node_modules_rc-menu_es_abb699aa._.js",
@@ -13,9 +13,10 @@
   "static/chunks/node_modules_rc-tree_es_d885700e._.js",
   "static/chunks/node_modules_lodash_90f72504._.js",
   "static/chunks/node_modules_recharts_es6_29f6c739._.js",
+  "static/chunks/node_modules_axios_lib_99999129._.js",
   "static/chunks/node_modules_@ant-design_b76c7119._.js",
   "static/chunks/node_modules_@rc-component_d461715c._.js",
-  "static/chunks/node_modules_13a11896._.js",
+  "static/chunks/node_modules_36f6d64f._.js",
   "static/chunks/src_app_763b6a1e._.js"
 ],
     source: "dynamic"

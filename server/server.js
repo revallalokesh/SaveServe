@@ -11,6 +11,7 @@ const ownerRoutes = require('./routes/owner');
 const studentRoutes = require('./routes/students');
 const menuRoutes = require('./routes/menu');
 const studentMenuRoutes = require('./routes/studentMenu');
+const studentMealStatusRoutes = require('./routes/studentMealStatus');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -58,6 +59,7 @@ app.use('/api/owner', ownerRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/student-menu', studentMenuRoutes);
+app.use('/api/student-meal-status', studentMealStatusRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

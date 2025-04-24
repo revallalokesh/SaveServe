@@ -4,6 +4,7 @@ const Menu = require('../models/Menu');
 const MealSelection = require('../models/MealSelection');
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 
 // Helper function to generate secure QR code
 function generateQRCode(studentId, hostelId, meal, date) {
@@ -56,12 +57,74 @@ router.get('/:hostelId', async (req, res) => {
 // Submit meal selections for a student
 router.post('/select', auth, async (req, res) => {
   try {
-    const { studentId, hostelId, dayOfWeek, selections, studentName, studentEmail } = req.body;
+    let { studentId, hostelId, dayOfWeek, selections, studentName, studentEmail } = req.body;
     const today = new Date().toISOString().split('T')[0];
+
+    console.log('[Server] Received meal selection request:', {
+      studentId,
+      hostelId,
+      dayOfWeek,
+      selections,
+      studentName,
+      studentEmail
+    });
 
     // Validate required fields
     if (!studentId || !hostelId || !dayOfWeek || !selections || !studentName || !studentEmail) {
+      console.log('[Server] Missing required fields:', {
+        studentId: !!studentId,
+        hostelId: !!hostelId,
+        dayOfWeek: !!dayOfWeek,
+        selections: !!selections,
+        studentName: !!studentName,
+        studentEmail: !!studentEmail
+      });
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Convert string IDs to ObjectId if they're not already
+    try {
+      console.log('[Server] Converting IDs:', {
+        studentId,
+        hostelId,
+        studentIdType: typeof studentId,
+        hostelIdType: typeof hostelId
+      });
+
+      // If IDs are already ObjectId instances, use them as is
+      if (studentId instanceof mongoose.Types.ObjectId) {
+        console.log('[Server] studentId is already an ObjectId');
+      } else {
+        // Convert string to ObjectId
+        studentId = new mongoose.Types.ObjectId(studentId);
+        console.log('[Server] Converted studentId to ObjectId');
+      }
+
+      if (hostelId instanceof mongoose.Types.ObjectId) {
+        console.log('[Server] hostelId is already an ObjectId');
+      } else {
+        // Convert string to ObjectId
+        hostelId = new mongoose.Types.ObjectId(hostelId);
+        console.log('[Server] Converted hostelId to ObjectId');
+      }
+
+      console.log('[Server] After conversion:', {
+        studentId,
+        hostelId,
+        studentIdType: typeof studentId,
+        hostelIdType: typeof hostelId
+      });
+    } catch (error) {
+      console.error('[Server] Error converting IDs to ObjectId:', error);
+      console.error('[Server] Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      return res.status(400).json({ 
+        error: 'Invalid student or hostel ID format',
+        details: error.message 
+      });
     }
 
     // Validate day of week
@@ -78,6 +141,8 @@ router.post('/select', auth, async (req, res) => {
       date: today
     });
 
+    console.log('[Server] Existing meal selection:', mealSelection);
+
     // Check if any meal is being resubmitted
     if (mealSelection) {
       for (const [meal, selected] of Object.entries(selections)) {
@@ -90,11 +155,20 @@ router.post('/select', auth, async (req, res) => {
     }
 
     // Initialize or update meals object
-    const meals = mealSelection ? { ...mealSelection.meals } : {
+    const meals = {
       breakfast: { selected: false, qrCode: null, used: false, usedAt: null, submittedAt: null },
       lunch: { selected: false, qrCode: null, used: false, usedAt: null, submittedAt: null },
       dinner: { selected: false, qrCode: null, used: false, usedAt: null, submittedAt: null }
     };
+
+    // If there's an existing selection, merge it with our default structure
+    if (mealSelection) {
+      Object.keys(meals).forEach(mealType => {
+        if (mealSelection.meals[mealType]) {
+          meals[mealType] = { ...meals[mealType], ...mealSelection.meals[mealType] };
+        }
+      });
+    }
 
     // Update only the selected meal
     for (const [meal, selected] of Object.entries(selections)) {
@@ -109,32 +183,49 @@ router.post('/select', auth, async (req, res) => {
       }
     }
 
+    console.log('[Server] Updated meals object:', JSON.stringify(meals, null, 2));
+
     // Get the latest expiry time among selected meals
     const expiryTimes = Object.entries(selections)
       .filter(([_, selected]) => selected)
       .map(([meal]) => getMealExpiryTime(meal, today));
     const latestExpiry = new Date(Math.max(...expiryTimes));
 
-    if (mealSelection) {
-      // Update existing selection
-      mealSelection.meals = meals;
-      mealSelection.expiresAt = latestExpiry;
-      mealSelection.studentName = studentName;
-      mealSelection.studentEmail = studentEmail;
-      await mealSelection.save();
-    } else {
-      // Create new selection
-      mealSelection = new MealSelection({
-        studentId,
-        studentName,
-        studentEmail,
-        hostelId,
-        dayOfWeek,
-        date: today,
-        meals,
-        expiresAt: latestExpiry
+    try {
+      if (mealSelection) {
+        // Update existing selection
+        mealSelection.meals = meals;
+        mealSelection.expiresAt = latestExpiry;
+        mealSelection.studentName = studentName;
+        mealSelection.studentEmail = studentEmail;
+        await mealSelection.save();
+      } else {
+        // Create new selection
+        mealSelection = new MealSelection({
+          studentId,
+          studentName,
+          studentEmail,
+          hostelId,
+          dayOfWeek,
+          date: today,
+          meals,
+          expiresAt: latestExpiry
+        });
+        await mealSelection.save();
+      }
+    } catch (saveError) {
+      console.error('[Server] Error saving meal selection:', saveError);
+      console.error('[Server] Save error details:', {
+        name: saveError.name,
+        message: saveError.message,
+        stack: saveError.stack,
+        validationErrors: saveError.errors,
+        mealsObject: JSON.stringify(meals, null, 2)
       });
-      await mealSelection.save();
+      return res.status(500).json({ 
+        error: 'Error saving meal selection',
+        details: saveError.message 
+      });
     }
 
     // Return only the QR codes for newly selected meals
@@ -154,7 +245,7 @@ router.post('/select', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('[Server] Error saving meal selections:', error);
+    console.error('[Server] Error in meal selection route:', error);
     console.error('[Server] Error details:', {
       name: error.name,
       message: error.message,
@@ -216,6 +307,28 @@ router.get('/selections/:studentId', auth, async (req, res) => {
     res.json(selections || { meals: { breakfast: {}, lunch: {}, dinner: {} } });
   } catch (error) {
     console.error('[Server] Error fetching meal selections:', error);
+    res.status(500).json({ error: 'Error fetching meal selections' });
+  }
+});
+
+// Get meal selections for a specific date
+router.get('/selections/date/:date', auth, async (req, res) => {
+  try {
+    const { date } = req.params;
+    const { hostelId } = req.query;
+
+    if (!hostelId) {
+      return res.status(400).json({ error: 'Hostel ID is required' });
+    }
+
+    const selections = await MealSelection.find({
+      hostelId,
+      date
+    }).select('studentName studentEmail meals');
+
+    res.json(selections);
+  } catch (error) {
+    console.error('[Server] Error fetching meal selections by date:', error);
     res.status(500).json({ error: 'Error fetching meal selections' });
   }
 });
