@@ -38,6 +38,7 @@ export function OwnerLogin({ onLoginSuccess }: OwnerLoginProps) {
       // Store token and user data
       localStorage.setItem("ownerData", JSON.stringify(data.user))
       localStorage.setItem("token", data.token)
+      localStorage.setItem("hostelId", data.user.hostelId)
       
       onLoginSuccess?.()
       router.push("/")

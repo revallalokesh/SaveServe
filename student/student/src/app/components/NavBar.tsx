@@ -165,7 +165,7 @@ export function NavBar({ items = [], className }: NavBarProps) {
 
           <div className="flex items-center gap-8">
             <Link
-              href="/"
+              href="/user/home"
               className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors relative"
             >
               <span className="absolute inset-x-0 -bottom-[21px] h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />

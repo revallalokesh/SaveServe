@@ -183,5 +183,69 @@ router.post('/use-qr', auth, async (req, res) => {
   }
 });
 
+// Get meal analytics for a specific date
+router.get('/analytics/:date', auth, async (req, res) => {
+  try {
+    const { date } = req.params;
+    const { hostelId } = req.query;
+
+    if (!hostelId) {
+      return res.status(400).json({ error: 'Hostel ID is required' });
+    }
+
+    // Convert hostelId string to ObjectId
+    let hostelObjectId;
+    try {
+      hostelObjectId = new mongoose.Types.ObjectId(hostelId);
+    } catch (err) {
+      console.error("Invalid Hostel ID format:", hostelId);
+      return res.status(400).json({ error: 'Invalid Hostel ID format' });
+    }
+
+    // Aggregate to get counts for each meal type
+    const mealCounts = await MealSelection.aggregate([
+      {
+        $match: {
+          hostelId: hostelObjectId,
+          date: date
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalBreakfast: {
+            $sum: { $cond: [{ $eq: ["$meals.breakfast.selected", true] }, 1, 0] }
+          },
+          totalLunch: {
+            $sum: { $cond: [{ $eq: ["$meals.lunch.selected", true] }, 1, 0] }
+          },
+          totalDinner: {
+            $sum: { $cond: [{ $eq: ["$meals.dinner.selected", true] }, 1, 0] }
+          },
+          totalStudents: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const analytics = mealCounts.length > 0 ? {
+      breakfast: mealCounts[0].totalBreakfast,
+      lunch: mealCounts[0].totalLunch,
+      dinner: mealCounts[0].totalDinner,
+      totalStudents: mealCounts[0].totalStudents
+    } : {
+      breakfast: 0,
+      lunch: 0,
+      dinner: 0,
+      totalStudents: 0
+    };
+
+    console.log(`[Server] Analytics for date ${date}, hostel ${hostelId}:`, analytics);
+    res.json(analytics);
+
+  } catch (error) {
+    console.error('[Server] Error fetching meal analytics:', error);
+    res.status(500).json({ error: 'Error fetching meal analytics' });
+  }
+});
 
 module.exports = router; 

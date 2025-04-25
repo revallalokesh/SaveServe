@@ -40,7 +40,9 @@ router.post('/login', async (req, res) => {
         username: hostel.username,
         name: hostel.owner,
         role: 'owner',
+        hostelId: hostel._id,
         hostel: {
+          id: hostel._id,
           name: hostel.name
         }
       }
@@ -64,7 +66,9 @@ router.get('/profile', auth, async (req, res) => {
       username: hostel.username,
       name: hostel.owner,
       role: 'owner',
+      hostelId: hostel._id,
       hostel: {
+        id: hostel._id,
         name: hostel.name
       }
     });
