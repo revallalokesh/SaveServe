@@ -21,6 +21,7 @@ const getDateOfWeekday = (weekday: string) => {
   const date = new Date(today);
   date.setDate(today.getDate() + diff);
   return date.toISOString().split('T')[0];
+
 };
 
 const YourMeals: React.FC = () => {
