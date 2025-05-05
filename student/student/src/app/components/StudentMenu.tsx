@@ -89,6 +89,9 @@ const StudentMenu: React.FC = () => {
     return weeklyMenu[day]?.[type] || [];
   };
 
+  // Helper to get QR key for localStorage
+  const getQrKey = (studentId: string, date: string, meal: string) => `qr_${studentId}_${date}_${meal}`;
+
   useEffect(() => {
     // Get student data from localStorage
     const studentDataString = localStorage.getItem('studentData');
@@ -146,7 +149,7 @@ const StudentMenu: React.FC = () => {
       try {
         const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
         const studentId = studentData.id;
-        
+        const today = new Date().toISOString().split('T')[0];
         if (!studentId) return;
 
         const response = await fetch(`http://localhost:5001/api/student-menu/selections/${studentId}`, {
@@ -160,38 +163,25 @@ const StudentMenu: React.FC = () => {
         }
 
         const data = await response.json();
-        
-        if (data && data.meals) {
-          setMealOptions(prev => ({
-            ...prev,
-            breakfast: {
-              ...prev.breakfast,
-              opted: data.meals.breakfast?.selected || false,
-              locked: data.meals.breakfast?.selected || false,
-              submitted: data.meals.breakfast?.selected || false,
-              qrCode: data.meals.breakfast?.qrCode || null
-            },
-            lunch: {
-              ...prev.lunch,
-              opted: data.meals.lunch?.selected || false,
-              locked: data.meals.lunch?.selected || false,
-              submitted: data.meals.lunch?.selected || false,
-              qrCode: data.meals.lunch?.qrCode || null
-            },
-            dinner: {
-              ...prev.dinner,
-              opted: data.meals.dinner?.selected || false,
-              locked: data.meals.dinner?.selected || false,
-              submitted: data.meals.dinner?.selected || false,
-              qrCode: data.meals.dinner?.qrCode || null
-            }
-          }));
-        }
+        // Try to load QR from localStorage if available
+        const meals = ['breakfast', 'lunch', 'dinner'] as (keyof DayMeals)[];
+        const newMealOptions = { ...mealOptions };
+        meals.forEach(meal => {
+          const qrKey = getQrKey(studentId, today, meal);
+          const localQr = localStorage.getItem(qrKey);
+          newMealOptions[meal] = {
+            ...newMealOptions[meal],
+            opted: data.meals[meal]?.selected || false,
+            locked: data.meals[meal]?.selected || false,
+            submitted: data.meals[meal]?.selected || false,
+            qrCode: localQr || data.meals[meal]?.qrCode || null
+          };
+        });
+        setMealOptions(newMealOptions);
       } catch (error) {
         console.error('Error fetching existing selections:', error);
       }
     };
-
     fetchExistingSelections();
   }, []);
 
@@ -220,14 +210,13 @@ const StudentMenu: React.FC = () => {
       message.warning('This meal has already been submitted');
       return;
     }
-
     try {
       const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
       const studentId = studentData.id;
       const hostelId = studentData.hostel?.id;
       const studentName = studentData.name;
       const studentEmail = studentData.email;
-
+      const today = new Date().toISOString().split('T')[0];
       // Validate IDs
       if (!studentId || !hostelId) {
         throw new Error('Student or hostel ID not found');
@@ -279,8 +268,11 @@ const StudentMenu: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('Success response:', data);
-      
+      // Save QR to localStorage for offline access
+      const qrKey = getQrKey(studentId, today, meal);
+      if (data.qrCodes[meal]) {
+        localStorage.setItem(qrKey, data.qrCodes[meal]);
+      }
       setMealOptions(prev => ({
         ...prev,
         [meal]: {
@@ -290,7 +282,6 @@ const StudentMenu: React.FC = () => {
           qrCode: data.qrCodes[meal]
         }
       }));
-
       message.success(`${meal.charAt(0).toUpperCase() + meal.slice(1)} selection submitted successfully!`);
     } catch (error) {
       console.error('Error submitting meal selection:', error);

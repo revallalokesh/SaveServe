@@ -5,6 +5,7 @@ const MealSelection = require('../models/MealSelection');
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const MealRating = require('../models/MealRating');
 
 // Helper function to generate secure QR code
 function generateQRCode(studentId, hostelId, meal, date) {
@@ -351,6 +352,44 @@ router.get('/selections/date/:date', auth, async (req, res) => {
   } catch (error) {
     console.error('[Server] Error fetching meal selections by date:', error);
     res.status(500).json({ error: 'Error fetching meal selections' });
+  }
+});
+
+// Save or update a meal rating
+router.post('/rate', auth, async (req, res) => {
+  try {
+    const { studentId, hostelId, date, mealType, rating } = req.body;
+    if (!studentId || !hostelId || !date || !mealType || !rating) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    if (![1,2,3,4,5].includes(rating)) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+    // Upsert: update if exists, insert if not
+    const mealRating = await MealRating.findOneAndUpdate(
+      { studentId, hostelId, date, mealType },
+      { rating, createdAt: new Date() },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    res.json({ message: 'Rating saved', mealRating });
+  } catch (error) {
+    console.error('[Server] Error saving meal rating:', error);
+    res.status(500).json({ error: 'Error saving meal rating', details: error.message });
+  }
+});
+
+// Get ratings for a student (optionally filtered by date)
+router.get('/ratings/:studentId', auth, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { date } = req.query;
+    const query = { studentId };
+    if (date) query.date = date;
+    const ratings = await MealRating.find(query);
+    res.json(ratings);
+  } catch (error) {
+    console.error('[Server] Error fetching meal ratings:', error);
+    res.status(500).json({ error: 'Error fetching meal ratings', details: error.message });
   }
 });
 

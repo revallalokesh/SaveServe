@@ -183,23 +183,39 @@ export function NavBar({ items = [], className }: NavBarProps) {
             </Link>
 
             {isLoggedIn ? (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleWalletClick}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium border-2 border-primary/20 hover:border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+              <>
+                <Link
+                  href="/user/meal-rating"
+                  className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors relative"
                 >
-                  <Wallet size={18} strokeWidth={2.5} className="text-primary" />
-                  <span>Wallet</span>
-                </button>
+                  <span className="text-xl">🍽️</span>
+                  <span>Rate Meals</span>
+                </Link>
+                <Link
+                  href="/user/your-meals"
+                  className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors relative"
+                >
+                  <span className="text-xl">🍱</span>
+                  <span>Your Meals</span>
+                </Link>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleWalletClick}
+                    className="flex items-center gap-2 px-5 py-2 text-sm font-medium border-2 border-primary/20 hover:border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                  >
+                    <Wallet size={18} strokeWidth={2.5} className="text-primary" />
+                    <span>Wallet</span>
+                  </button>
 
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5"
-                >
-                  <LogOut size={18} strokeWidth={2.5} />
-                  <span>Logout</span>
-                </button>
-              </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5"
+                  >
+                    <LogOut size={18} strokeWidth={2.5} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </>
             ) : (
               <div className="flex items-center gap-3">
                 <button

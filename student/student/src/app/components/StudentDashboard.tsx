@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { Menu, MessageSquare, Bell, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Card from 'antd/es/card';
-
 interface StudentData {
   name: string;
   email: string;
@@ -84,7 +83,7 @@ const StudentDashboard: React.FC = () => {
             <span className="text-sm font-medium text-gray-800">View Menu</span>
           </button>
           <button 
-            onClick={() => handleNavigation('/user/feedback')}
+            onClick={() => handleNavigation('/user/meal-rating')}
             className="p-6 rounded-xl bg-white hover:bg-gray-50 border border-gray-100 hover:border-primary/20 transition-all duration-300 flex flex-col items-center justify-center group"
           >
             <MessageSquare className="w-6 h-6 mb-2 text-gray-600 group-hover:text-primary" />

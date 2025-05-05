@@ -1,4 +1,14 @@
 {
+  "name": "save-serve-complete",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cd owner/owner && npm run dev\" \"cd student/student && npm run dev\" \"cd server && npm run dev\" \"cd admin && npm run dev\"",
+    "install-all": "npm install && cd owner/owner && npm install && cd ../../student/student && npm install && cd ../../server && npm install && cd ../admin && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
   "dependencies": {
     "@yudiel/react-qr-scanner": "^2.2.1",
     "bcryptjs": "^3.0.2",
