@@ -29,7 +29,7 @@
     }
   },
   "include": [
-    "next-env.d.ts", // Only include files in the "src" directory
+    "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts"

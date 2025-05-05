@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { DayPicker } from 'react-day-picker';
 import {
@@ -51,7 +51,7 @@ export default function Analytics() {
   const [error, setError] = useState<string>('');
   const router = useRouter();
 
-  const fetchAnalytics = async (selectedDate: Date) => {
+  const fetchAnalytics = useCallback(async (selectedDate: Date) => {
     try {
       const hostelId = localStorage.getItem('hostelId');
       const token = localStorage.getItem('token');
@@ -123,11 +123,11 @@ export default function Analytics() {
       console.error('Error in fetchAnalytics:', error);
       setError('Failed to load analytics data. Please try again.');
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchAnalytics(date);
-  }, [date]);
+  }, [date, fetchAnalytics]);
 
   if (error) {
     return (

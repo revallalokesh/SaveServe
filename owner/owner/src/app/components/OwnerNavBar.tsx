@@ -32,7 +32,7 @@ const publicItems: NavItem[] = [
   { name: "Contact Support", url: "/support", icon: MessageSquare },
 ]
 
-export function OwnerNavBar({ items = defaultItems, className }: NavBarProps) {
+export function OwnerNavBar({ items = defaultItems }: NavBarProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const pathname = usePathname()

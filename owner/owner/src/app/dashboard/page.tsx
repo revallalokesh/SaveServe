@@ -29,7 +29,7 @@ export default function DashboardPage() {
       console.error('[Dashboard] Error parsing user data:', error)
       router.push('/login')
     }
-  }, [])
+  }, [router])
 
   return (
     <div className="container mx-auto px-4 py-8">
