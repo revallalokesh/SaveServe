@@ -27,7 +27,7 @@ export function StudentManagement() {
         return
       }
       
-      const response = await fetch('http://localhost:5001/api/students', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/students', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -59,7 +59,7 @@ export function StudentManagement() {
         return
       }
 
-      const response = await fetch('http://localhost:5001/api/students/register', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/students/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ export function StudentManagement() {
         return
       }
 
-      const response = await fetch(`http://localhost:5001/api/students/${selectedStudent?._id}/reset-password`, {
+      const response = await fetch(`https://save-serve-server.onrender.com/api/students/${selectedStudent?._id}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

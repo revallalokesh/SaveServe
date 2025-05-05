@@ -93,7 +93,7 @@ export default function ScanPage() {
         return
       }
 
-      const response = await fetch('http://localhost:5001/api/student-menu/validate-qr', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/student-menu/validate-qr', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

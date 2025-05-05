@@ -49,7 +49,7 @@ export function Hostels() {
 
   const fetchHostels = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/hostels', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/hostels', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -69,7 +69,7 @@ export function Hostels() {
       const hostelData = { ...values };
       delete hostelData.confirmPassword;
 
-      const response = await fetch('http://localhost:5001/api/hostels', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/hostels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export function Hostels() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/hostels/${id}`, {
+      const response = await fetch(`https://save-serve-server.onrender.com/api/hostels/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

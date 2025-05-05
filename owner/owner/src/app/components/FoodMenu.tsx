@@ -40,7 +40,7 @@ export function FoodMenu() {
         return
       }
 
-      const response = await fetch('http://localhost:5001/api/menu', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/menu', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -97,7 +97,7 @@ export function FoodMenu() {
 
       const items = values.items.split(",").map(item => item.trim()).filter(item => item)
       
-      const response = await fetch(`http://localhost:5001/api/menu/${selectedDay}/${selectedMeal}`, {
+      const response = await fetch(`https://save-serve-server.onrender.com/api/menu/${selectedDay}/${selectedMeal}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

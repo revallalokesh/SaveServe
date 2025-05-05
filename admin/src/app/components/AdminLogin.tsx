@@ -22,7 +22,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:5001/api/admin/login', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

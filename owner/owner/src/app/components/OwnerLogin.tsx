@@ -21,7 +21,7 @@ export function OwnerLogin({ onLoginSuccess }: OwnerLoginProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:5001/api/owner/login', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/owner/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
