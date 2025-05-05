@@ -112,7 +112,7 @@ const StudentMenu: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:5001/api/student-menu/${hostelId}`);
+        const response = await fetch(`https://save-serve-server.onrender.com/api/student-menu/${hostelId}`);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -140,7 +140,7 @@ const StudentMenu: React.FC = () => {
         const today = new Date().toISOString().split('T')[0];
         if (!studentId) return;
 
-        const response = await fetch(`http://localhost:5001/api/student-menu/selections/${studentId}`, {
+        const response = await fetch(`https://save-serve-server.onrender.com/api/student-menu/selections/${studentId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
           }
@@ -231,7 +231,7 @@ const StudentMenu: React.FC = () => {
         hostelIdValid: isValidObjectId(hostelId)
       });
 
-      const response = await fetch('http://localhost:5001/api/student-menu/select', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/student-menu/select', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

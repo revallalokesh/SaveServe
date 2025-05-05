@@ -56,7 +56,7 @@ export function NavBar({ items = [], className }: NavBarProps) {
     // Fetch hostels from API
     const fetchHostels = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/hostels');
+        const response = await fetch('https://save-serve-server.onrender.com/api/hostels');
         if (!response.ok) {
           throw new Error('Failed to fetch hostels');
         }
@@ -99,7 +99,7 @@ export function NavBar({ items = [], className }: NavBarProps) {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await fetch('http://localhost:5001/api/students/login', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/students/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

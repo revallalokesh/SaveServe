@@ -71,7 +71,7 @@ const StudentMealRating: React.FC = () => {
       return;
     }
     setLoading(true);
-    fetch(`http://localhost:5001/api/student-menu/${hostelId}`)
+    fetch(`https://save-serve-server.onrender.com/api/student-menu/${hostelId}`)
       .then(res => res.json())
       .then(data => {
         setMenu(data[todayDay] || { breakfast: [], lunch: [], dinner: [] });
@@ -86,7 +86,7 @@ const StudentMealRating: React.FC = () => {
   // Fetch previous ratings
   useEffect(() => {
     if (!studentId || !token) return;
-    fetch(`http://localhost:5001/api/student-menu/ratings/${studentId}?date=${today}`, {
+    fetch(`https://save-serve-server.onrender.com/api/student-menu/ratings/${studentId}?date=${today}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -118,7 +118,7 @@ const StudentMealRating: React.FC = () => {
     }
     setSubmitting(prev => ({ ...prev, [meal]: true }));
     try {
-      const res = await fetch('http://localhost:5001/api/student-menu/rate', {
+      const res = await fetch('https://save-serve-server.onrender.com/api/student-menu/rate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

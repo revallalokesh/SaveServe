@@ -12,7 +12,7 @@ const StudentLogin = () => {
   useEffect(() => {
     const fetchHostels = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/hostels');
+        const response = await fetch('https://save-serve-server.onrender.com/api/hostels');
         if (!response.ok) {
           throw new Error('Failed to fetch hostels');
         }
@@ -35,7 +35,7 @@ const StudentLogin = () => {
 
     try {
       const formData = new FormData(e.target);
-      const response = await fetch('http://localhost:5001/api/students/login', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/students/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
