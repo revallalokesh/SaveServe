@@ -21,7 +21,7 @@ connectDB();
 
 // CORS configuration
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'https://save-serve-student.vercel.app', 'https://save-serve-owner.vercel.app', 'https://save-serve-admin.vercel.app'], // Add your frontend URLs
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'https://save-serve-student.vercel.app', 'https://save-serve-owner.vercel.app', 'https://save-serve-admin.vercel.app','https://admin.saveserves.com'], // Add your frontend URLs
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   credentials: true,
