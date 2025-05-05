@@ -7,6 +7,7 @@ import message from 'antd/es/message';
 import { SmileOutlined, MehOutlined, FrownOutlined, HeartOutlined, FrownFilled } from '@ant-design/icons';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -181,54 +182,65 @@ const StudentMealRating: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl mt-20">
       <Title level={2} className="mb-8 text-center">Rate Today's Meals</Title>
-      {mealTypes.map(meal => (
-        <Card key={meal} className="mb-8 rounded-2xl shadow-sm border border-gray-100">
-          <div className="mb-4">
-            <Title level={4} className="mb-2 capitalize">{meal}</Title>
-            <div className="meal-items mb-2">
-              {menu[meal].length > 0 ? (
-                menu[meal].map((item, idx) => (
-                  <Text key={idx} className="menu-item">{item}</Text>
-                ))
-              ) : (
-                <Text type="secondary">No items listed for {meal}.</Text>
-              )}
+      {mealTypes.map((meal, i) => (
+        <motion.div
+          key={meal}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.08, type: 'spring', stiffness: 120 }}
+        >
+          <Card className="mb-8 rounded-2xl shadow-sm border border-gray-100">
+            <div className="mb-4">
+              <Title level={4} className="mb-2 capitalize">{meal}</Title>
+              <div className="meal-items mb-2">
+                {menu[meal].length > 0 ? (
+                  menu[meal].map((item, idx) => (
+                    <Text key={idx} className="menu-item">{item}</Text>
+                  ))
+                ) : (
+                  <Text type="secondary">No items listed for {meal}.</Text>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-4 justify-center mb-2">
-            {EMOJI_SCALE.map(({ value, emoji, label }) => (
-              <button
-                key={value}
-                className={`text-3xl focus:outline-none transition-transform ${pendingRatings[meal] === value ? 'scale-125' : 'opacity-70 hover:scale-110'}`}
-                onClick={() => handleSelectRating(meal, value)}
-                disabled={submitting[meal]}
-                title={label}
-                aria-label={label}
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-          <div className="flex justify-center">
-            <Button
-              type="primary"
-              onClick={() => handleSubmitRating(meal)}
-              disabled={submitting[meal] || pendingRatings[meal] == null || ratings[meal] === pendingRatings[meal]}
-              loading={submitting[meal]}
-              className="mt-2"
-            >
-              {ratings[meal] === pendingRatings[meal] ? 'Submitted' : 'Submit Rating'}
-            </Button>
-          </div>
-          {ratings[meal] && (
-            <div className="text-center mt-2">
-              <span className="text-lg">Your rating: </span>
-              <span className="text-2xl">{EMOJI_SCALE[ratings[meal]! - 1].emoji}</span>
-              <span className="ml-2 text-base text-gray-500">({EMOJI_SCALE[ratings[meal]! - 1].label})</span>
+            <div className="flex items-center gap-4 justify-center mb-2">
+              {EMOJI_SCALE.map(({ value, emoji, label }) => (
+                <motion.button
+                  key={value}
+                  className={`text-3xl focus:outline-none transition-transform ${pendingRatings[meal] === value ? 'scale-125' : 'opacity-70 hover:scale-110'}`}
+                  onClick={() => handleSelectRating(meal, value)}
+                  disabled={submitting[meal]}
+                  title={label}
+                  aria-label={label}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  {emoji}
+                </motion.button>
+              ))}
             </div>
-          )}
-        </Card>
+            <div className="flex justify-center">
+              <motion.div whileTap={{ scale: 0.96 }}>
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmitRating(meal)}
+                  disabled={submitting[meal] || pendingRatings[meal] == null || ratings[meal] === pendingRatings[meal]}
+                  loading={submitting[meal]}
+                  className="mt-2"
+                >
+                  {ratings[meal] === pendingRatings[meal] ? 'Submitted' : 'Submit Rating'}
+                </Button>
+              </motion.div>
+            </div>
+            {ratings[meal] && (
+              <div className="text-center mt-2">
+                <span className="text-lg">Your rating: </span>
+                <span className="text-2xl">{EMOJI_SCALE[ratings[meal]! - 1].emoji}</span>
+                <span className="ml-2 text-base text-gray-500">({EMOJI_SCALE[ratings[meal]! - 1].label})</span>
+              </div>
+            )}
+          </Card>
+        </motion.div>
       ))}
       <style jsx global>{`
         .meal-items {

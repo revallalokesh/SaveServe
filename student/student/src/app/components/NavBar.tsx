@@ -1,9 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { LucideIcon, LogIn, Home, UserPlus, Info, LogOut, Wallet } from "lucide-react"
+import { LucideIcon, LogIn, Home, UserPlus, Info, LogOut, Wallet, Menu as MenuIcon, X as CloseIcon } from "lucide-react"
 import { cn } from "../lib/utils"
 import WalletComponent from "./Wallet"
 
@@ -39,6 +39,7 @@ export function NavBar({ items = [], className }: NavBarProps) {
   const [showLoginForm, setShowLoginForm] = useState(false)
   const [showWallet, setShowWallet] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [loginData, setLoginData] = useState<LoginData>({
     name: "",
     email: "",
@@ -148,6 +149,88 @@ export function NavBar({ items = [], className }: NavBarProps) {
     setShowWallet(true);
   };
 
+  const navLinks = (
+    <>
+      <motion.div whileHover={{ scale: 1.05, opacity: 0.85 }}>
+        <Link
+          href="/user/home"
+          className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors relative"
+        >
+          <span className="absolute inset-x-0 -bottom-[21px] h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+          <Home size={18} strokeWidth={2.5} className="group-hover:text-primary transition-colors" />
+          <span>Home</span>
+        </Link>
+      </motion.div>
+      <motion.div whileHover={{ scale: 1.05, opacity: 0.85 }}>
+        <Link
+          href="/about"
+          className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors relative"
+        >
+          <span className="absolute inset-x-0 -bottom-[21px] h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+          <Info size={18} strokeWidth={2.5} className="group-hover:text-primary transition-colors" />
+          <span>About</span>
+        </Link>
+      </motion.div>
+      {isLoggedIn && (
+        <>
+          <motion.div whileHover={{ scale: 1.05, opacity: 0.85 }}>
+            <Link
+              href="/user/meal-rating"
+              className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors relative"
+            >
+              <span className="text-xl">🍽️</span>
+              <span>Rate Meals</span>
+            </Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05, opacity: 0.85 }}>
+            <Link
+              href="/user/your-meals"
+              className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors relative"
+            >
+              <span className="text-xl">🍱</span>
+              <span>Your Meals</span>
+            </Link>
+          </motion.div>
+        </>
+      )}
+    </>
+  )
+
+  const navActions = isLoggedIn ? (
+    <div className="flex items-center gap-3 mt-4 md:mt-0">
+      <button
+        onClick={handleWalletClick}
+        className="flex items-center gap-2 px-5 py-2 text-sm font-medium border-2 border-primary/20 hover:border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+      >
+        <Wallet size={18} strokeWidth={2.5} className="text-primary" />
+        <span>Wallet</span>
+      </button>
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5"
+      >
+        <LogOut size={18} strokeWidth={2.5} />
+        <span>Logout</span>
+      </button>
+    </div>
+  ) : (
+    <div className="flex items-center gap-3 mt-4 md:mt-0">
+      <button
+        onClick={() => setShowLoginForm(true)}
+        className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5"
+      >
+        <LogIn size={18} strokeWidth={2.5} />
+        <span>Login</span>
+      </button>
+      <button
+        className="flex items-center gap-2 px-5 py-2 text-sm font-medium border-2 border-primary/20 hover:border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+      >
+        <UserPlus size={18} strokeWidth={2.5} />
+        <span>Request Signup</span>
+      </button>
+    </div>
+  )
+
   return (
     <>
       <div
@@ -156,86 +239,62 @@ export function NavBar({ items = [], className }: NavBarProps) {
           className,
         )}
       >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
               Student Dashboard
             </span>
           </div>
-
-          <div className="flex items-center gap-8">
-            <Link
-              href="/user/home"
-              className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors relative"
+          {/* Hamburger for mobile */}
+          <div className="md:hidden flex items-center">
+            <button
+              aria-label="Open menu"
+              onClick={() => setShowMobileMenu(true)}
+              className="p-2 rounded-lg hover:bg-gray-200 focus:outline-none"
             >
-              <span className="absolute inset-x-0 -bottom-[21px] h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-              <Home size={18} strokeWidth={2.5} className="group-hover:text-primary transition-colors" />
-              <span>Home</span>
-            </Link>
-
-            <Link
-              href="/about"
-              className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors relative"
-            >
-              <span className="absolute inset-x-0 -bottom-[21px] h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-              <Info size={18} strokeWidth={2.5} className="group-hover:text-primary transition-colors" />
-              <span>About</span>
-            </Link>
-
-            {isLoggedIn ? (
-              <>
-                <Link
-                  href="/user/meal-rating"
-                  className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors relative"
-                >
-                  <span className="text-xl">🍽️</span>
-                  <span>Rate Meals</span>
-                </Link>
-                <Link
-                  href="/user/your-meals"
-                  className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors relative"
-                >
-                  <span className="text-xl">🍱</span>
-                  <span>Your Meals</span>
-                </Link>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleWalletClick}
-                    className="flex items-center gap-2 px-5 py-2 text-sm font-medium border-2 border-primary/20 hover:border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
-                  >
-                    <Wallet size={18} strokeWidth={2.5} className="text-primary" />
-                    <span>Wallet</span>
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5"
-                  >
-                    <LogOut size={18} strokeWidth={2.5} />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowLoginForm(true)}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/35 hover:-translate-y-0.5"
-                >
-                  <LogIn size={18} strokeWidth={2.5} />
-                  <span>Login</span>
-                </button>
-                
-                <button
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium border-2 border-primary/20 hover:border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
-                >
-                  <UserPlus size={18} strokeWidth={2.5} />
-                  <span>Request Signup</span>
-                </button>
-              </div>
-            )}
+              <MenuIcon size={28} />
+            </button>
+          </div>
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks}
+            {navActions}
           </div>
         </div>
+        {/* Mobile menu overlay */}
+        {showMobileMenu && (
+          <AnimatePresence>
+            <motion.div
+              className="fixed inset-0 z-50 bg-black/60 flex flex-col"
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <div className="bg-background w-full p-4 flex flex-col gap-4 shadow-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
+                    Student Dashboard
+                  </span>
+                  <motion.button
+                    aria-label="Close menu"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="p-2 rounded-lg hover:bg-gray-200 focus:outline-none"
+                    whileTap={{ scale: 0.9, rotate: 90 }}
+                  >
+                    <CloseIcon size={28} />
+                  </motion.button>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {navLinks}
+                  {navActions}
+                </div>
+              </div>
+              {/* Click outside to close */}
+              <div className="flex-1" onClick={() => setShowMobileMenu(false)} />
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
 
       {showLoginForm && (
