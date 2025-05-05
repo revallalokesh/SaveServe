@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { AdminLogin } from "./components/AdminLogin";
 import { AdminNavBar } from "./components/AdminNavBar";
 

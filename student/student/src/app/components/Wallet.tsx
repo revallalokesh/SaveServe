@@ -28,7 +28,7 @@ const MEAL_CREDIT_AMOUNTS = {
   dinner: 100,
 };
 
-const Wallet: React.FC<WalletProps> = ({ studentId }) => {
+const Wallet: React.FC<WalletProps> = ({  }) => {
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
 

@@ -58,7 +58,7 @@ export function Owners() {
         setIsResetModalVisible(false)
         resetForm.resetFields()
       }
-    } catch (error) {
+    } catch {
       message.error("Failed to reset password")
     }
   }
@@ -90,7 +90,7 @@ export function Owners() {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Owner) => (
+      render: (_: unknown, record: Owner) => (
         <Button
           type="primary"
           icon={<KeyOutlined />}

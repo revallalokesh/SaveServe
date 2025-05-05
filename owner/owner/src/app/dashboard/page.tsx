@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Analytics } from '../components/Analytics'
+import Analytics from '../components/Analytics'
 
 export default function DashboardPage() {
   const router = useRouter()

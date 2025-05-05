@@ -34,8 +34,8 @@ interface LoginData {
 }
 
 export function NavBar({ items = [], className }: NavBarProps) {
-  const [activeTab, setActiveTab] = useState(items[0]?.name || "")
-  const [isMobile, setIsMobile] = useState(false)
+  const [, ] = useState(items[0]?.name || "")
+  const [, setIsMobile] = useState(false)
   const [showLoginForm, setShowLoginForm] = useState(false)
   const [showWallet, setShowWallet] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)

@@ -14,7 +14,6 @@ interface NavItem {
 
 interface NavBarProps {
   items?: NavItem[]
-  className?: string
 }
 
 const defaultItems: NavItem[] = [
@@ -29,9 +28,8 @@ const defaultItems: NavItem[] = [
   { name: "Logout", url: "#", emoji: "🚪" },
 ]
 
-export function AdminNavBar({ items = defaultItems, className }: NavBarProps) {
+export function AdminNavBar({ items = defaultItems }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0]?.name || "")
-  const [isMobile, setIsMobile] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
@@ -47,16 +45,6 @@ export function AdminNavBar({ items = defaultItems, className }: NavBarProps) {
     checkAuth()
     window.addEventListener('storage', checkAuth)
     return () => window.removeEventListener('storage', checkAuth)
-  }, [])
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   const handleLogout = () => {

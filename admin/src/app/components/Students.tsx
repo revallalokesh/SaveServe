@@ -80,13 +80,13 @@ export function Students() {
     setSearchText("") // Reset search when hostel changes
   }
 
-  const handleResetPassword = async (values: { newPassword: string }) => {
+  const handleResetPassword = async () => {
     try {
       // Here you would typically make an API call to reset the password
       message.success(`Password reset for ${selectedStudent?.name}`)
       setIsResetModalVisible(false)
       resetForm.resetFields()
-    } catch (error) {
+    } catch {
       message.error("Failed to reset password")
     }
   }
@@ -137,7 +137,7 @@ export function Students() {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Student) => (
+      render: (_: unknown, record: Student) => (
         <Button
           type="primary"
           icon={<KeyOutlined />}

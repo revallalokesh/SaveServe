@@ -2,15 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import Card from 'antd/es/card';
 import Typography from 'antd/es/typography';
-import Button from 'antd/es/button';
 import QRCode from 'antd/es/qrcode';
-import message from 'antd/es/message';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const { Title, Text } = Typography;
 
 const mealTypes = ['breakfast', 'lunch', 'dinner'] as const;
-type MealType = typeof mealTypes[number];
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 const getQrKey = (studentId: string, date: string, meal: string) => `qr_${studentId}_${date}_${meal}`;
@@ -27,9 +24,9 @@ const getDateOfWeekday = (weekday: string) => {
 };
 
 const YourMeals: React.FC = () => {
-  const [studentId, setStudentId] = useState<string | null>(null);
+  const [, setStudentId] = useState<string | null>(null);
   const [qrData, setQrData] = useState<{ [key: string]: string | null }>({});
-  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
@@ -47,32 +44,6 @@ const YourMeals: React.FC = () => {
     setQrData(qrMap);
   }, []);
 
-  const handleRefreshQr = async (date: string, meal: MealType) => {
-    if (!studentId) return;
-    setLoading(true);
-    try {
-      const response = await fetch(`http://localhost:5001/api/student-menu/selections/${studentId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch QR');
-      const data = await response.json();
-      const qr = data.meals[meal]?.qrCode || null;
-      const qrKey = getQrKey(studentId, date, meal);
-      if (qr) {
-        localStorage.setItem(qrKey, qr);
-        setQrData(prev => ({ ...prev, [`${date}_${meal}`]: qr }));
-        message.success('QR refreshed!');
-      } else {
-        message.info('No QR found for this meal.');
-      }
-    } catch (err) {
-      message.error('Failed to refresh QR');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl mt-20">

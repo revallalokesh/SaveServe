@@ -4,10 +4,9 @@ import Card from 'antd/es/card';
 import Typography from 'antd/es/typography';
 import Button from 'antd/es/button';
 import message from 'antd/es/message';
-import { SmileOutlined, MehOutlined, FrownOutlined, HeartOutlined, FrownFilled } from '@ant-design/icons';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -78,10 +77,10 @@ const StudentMealRating: React.FC = () => {
         setMenu(data[todayDay] || { breakfast: [], lunch: [], dinner: [] });
         setLoading(false);
       })
-      .catch(err => {
-        setError('Failed to load menu.');
-        setLoading(false);
-      });
+      // .catch(err => {
+      //   setError('Failed to load menu.');
+      //   setLoading(false);
+      // });
   }, [hostelId, todayDay]);
 
   // Fetch previous ratings
@@ -94,7 +93,8 @@ const StudentMealRating: React.FC = () => {
       .then(data => {
         const newRatings: RatingsState = { breakfast: null, lunch: null, dinner: null };
         const newPending: PendingRatingsState = { breakfast: null, lunch: null, dinner: null };
-        data.forEach((r: any) => {
+        type RatingResponse = { mealType: MealType; rating: number };
+        data.forEach((r: RatingResponse) => {
           if (mealTypes.includes(r.mealType)) {
             newRatings[r.mealType as MealType] = r.rating;
             newPending[r.mealType as MealType] = r.rating;
@@ -138,8 +138,12 @@ const StudentMealRating: React.FC = () => {
       }
       setRatings(prev => ({ ...prev, [meal]: rating }));
       message.success(`Rated ${meal.charAt(0).toUpperCase() + meal.slice(1)}: ${EMOJI_SCALE[rating-1].label}`);
-    } catch (err: any) {
-      message.error(err.message || 'Failed to save rating');
+    } catch (err) {
+      if (err instanceof Error) {
+        message.error(err.message || 'Failed to save rating');
+      } else {
+        message.error('Failed to save rating');
+      }
     } finally {
       setSubmitting(prev => ({ ...prev, [meal]: false }));
     }
@@ -181,7 +185,7 @@ const StudentMealRating: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl mt-20">
-      <Title level={2} className="mb-8 text-center">Rate Today's Meals</Title>
+      <Title level={2} className="mb-8 text-center">Rate Today&apos;s Meals</Title>
       {mealTypes.map((meal, i) => (
         <motion.div
           key={meal}

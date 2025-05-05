@@ -50,7 +50,7 @@ interface WeeklyMenuData {
 
 const StudentMenu: React.FC = () => {
   const router = useRouter();
-  const [selectedDay, setSelectedDay] = useState<string>(getCurrentDay());
+  const [selectedDay, ] = useState<string>(getCurrentDay());
   const [mealOptions, setMealOptions] = useState<DayMeals>({
     breakfast: { opted: false, locked: false, submitted: false },
     lunch: { opted: false, locked: false, submitted: false },

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Table, Button, Modal, Form, Input, message, Card, Tooltip } from "antd"
+import { Table, Button, Modal, Form, Input, message, Card } from "antd"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   PlusOutlined, 
@@ -23,6 +23,16 @@ interface Hostel {
   username: string
   password: string
   createdAt: string
+}
+
+interface RegisterHostelValues {
+  name: string;
+  owner: string;
+  address: string;
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword?: string;
 }
 
 export function Hostels() {
@@ -47,16 +57,17 @@ export function Hostels() {
       if (!response.ok) throw new Error('Failed to fetch hostels')
       const data = await response.json()
       setHostels(data)
-    } catch (error) {
+    } catch {
       message.error('Failed to fetch hostels')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleRegister = async (values: any) => {
+  const handleRegister = async (values: RegisterHostelValues) => {
     try {
-      const { confirmPassword, ...hostelData } = values;
+      const hostelData = { ...values };
+      delete hostelData.confirmPassword;
 
       const response = await fetch('http://localhost:5001/api/hostels', {
         method: 'POST',
@@ -77,8 +88,8 @@ export function Hostels() {
       message.success("Hostel registered successfully")
       setIsRegisterModalVisible(false)
       form.resetFields()
-    } catch (error: any) {
-      message.error(error.message || "Failed to register hostel")
+    } catch {
+      message.error("Failed to register hostel")
     }
   }
 
@@ -95,32 +106,8 @@ export function Hostels() {
       
       setHostels(hostels.filter(hostel => hostel._id !== id))
       message.success('Hostel deleted successfully')
-    } catch (error) {
+    } catch {
       message.error('Failed to delete hostel')
-    }
-  }
-
-  const handleStatusChange = async (id: string, newStatus: 'active' | 'inactive') => {
-    try {
-      const hostel = hostels.find(h => h._id === id)
-      if (!hostel) return
-
-      const response = await fetch(`http://localhost:5001/api/hostels/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ ...hostel, status: newStatus })
-      })
-
-      if (!response.ok) throw new Error('Failed to update hostel status')
-
-      const updatedHostel = await response.json()
-      setHostels(hostels.map(h => h._id === id ? updatedHostel : h))
-      message.success('Hostel status updated successfully')
-    } catch (error) {
-      message.error('Failed to update hostel status')
     }
   }
 
@@ -129,11 +116,6 @@ export function Hostels() {
     hostel.address.toLowerCase().includes(searchText.toLowerCase()) ||
     hostel.owner.toLowerCase().includes(searchText.toLowerCase())
   )
-
-  const renderStatus = (status: string = 'inactive') => {
-    const displayStatus = status || 'inactive';
-    return displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1);
-  };
 
   const columns: TableProps<Hostel>['columns'] = [
     {
