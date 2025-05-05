@@ -6,13 +6,13 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    "allowJs": false, // Disable JavaScript files if not needed
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node", // Use "node" for better compatibility
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -29,12 +29,17 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "next-env.d.ts",
+    "next-env.d.ts", // Only include files in the "src" directory
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next", // Exclude the build output folder
+    "dist", // Exclude any other build artifacts
+    "**/*.test.ts", // Exclude test files
+    "**/*.test.tsx",
+    "**/__tests__/**" // Exclude test directories
   ]
 }

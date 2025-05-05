@@ -140,7 +140,7 @@ const StudentMealRating: React.FC = () => {
       message.success(`Rated ${meal.charAt(0).toUpperCase() + meal.slice(1)}: ${EMOJI_SCALE[rating-1].label}`);
     } catch (err) {
       if (err instanceof Error) {
-        message.error(err.message || 'Failed to save rating');
+      message.error(err.message || 'Failed to save rating');
       } else {
         message.error('Failed to save rating');
       }
