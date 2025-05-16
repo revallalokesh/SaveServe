@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AdminNavBar } from "./components/AdminNavBar"
+import { AuthProvider } from "./components/AuthContext"
+import { RouteGuard } from "./components/RouteGuard"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +28,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div className="min-h-screen bg-background">
-          <AdminNavBar />
-          <main className="pt-24 px-4">
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <RouteGuard>
+            <div className="min-h-screen bg-background">
+              <AdminNavBar />
+              <main className="pt-24 px-4">
+                {children}
+              </main>
+            </div>
+          </RouteGuard>
+        </AuthProvider>
       </body>
     </html>
   )

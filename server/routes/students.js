@@ -4,6 +4,20 @@ const Student = require('../models/Student');
 const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 
+// Get students by hostel ID (for admin)
+router.get('/hostel/:hostelId', async (req, res) => {
+  try {
+    const { hostelId } = req.params;
+    const students = await Student.find({ hostelId })
+      .select('-password')
+      .sort({ createdAt: -1 });
+    res.json(students);
+  } catch (error) {
+    console.error('Error getting students by hostel:', error);
+    res.status(500).json({ error: 'Error fetching students' });
+  }
+});
+
 // Student login route
 router.post('/login', async (req, res) => {
   try {

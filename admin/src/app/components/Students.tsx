@@ -1,71 +1,25 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Table, Select, Input, Card, Button, Modal, Form, message } from "antd"
 import { SearchOutlined, KeyOutlined } from "@ant-design/icons"
 
 interface Student {
-  id: string
+  _id: string
   name: string
   email: string
-  roomNumber: string
-  phone: string
-  status: "active" | "inactive"
+  hostelId: string
+  createdAt: string
 }
 
 interface Hostel {
-  id: string
+  _id: string
   name: string
-}
-
-// Temporary data
-const mockHostels: Hostel[] = [
-  { id: "1", name: "University Hostel A" },
-  { id: "2", name: "University Hostel B" },
-  { id: "3", name: "University Hostel C" },
-  { id: "4", name: "University Hostel D" },
-  { id: "5", name: "University Hostel E" }
-]
-
-const mockStudents: Record<string, Student[]> = {
-  "1": [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      roomNumber: "101",
-      phone: "1234567890",
-      status: "active"
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      roomNumber: "102",
-      phone: "2345678901",
-      status: "active"
-    }
-  ],
-  "2": [
-    {
-      id: "3",
-      name: "Mike Johnson",
-      email: "mike@example.com",
-      roomNumber: "201",
-      phone: "3456789012",
-      status: "active"
-    }
-  ],
-  "3": [
-    {
-      id: "4",
-      name: "Sarah Williams",
-      email: "sarah@example.com",
-      roomNumber: "301",
-      phone: "4567890123",
-      status: "active"
-    }
-  ]
+  owner: string
+  email: string
+  username: string
+  address: string
+  createdAt: string
 }
 
 export function Students() {
@@ -74,6 +28,55 @@ export function Students() {
   const [isResetModalVisible, setIsResetModalVisible] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [resetForm] = Form.useForm()
+  const [hostels, setHostels] = useState<Hostel[]>([])
+  const [loading, setLoading] = useState(true)
+  const [students, setStudents] = useState<Record<string, Student[]>>({})
+
+  useEffect(() => {
+    fetchHostels()
+  }, [])
+
+  useEffect(() => {
+    if (selectedHostel) {
+      fetchStudentsByHostel(selectedHostel)
+    }
+  }, [selectedHostel])
+
+  const fetchHostels = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/hostels')
+      if (!response.ok) {
+        throw new Error('Failed to fetch hostels')
+      }
+      const data = await response.json()
+      setHostels(data)
+    } catch (error) {
+      message.error('Failed to load hostels')
+      console.error('Error fetching hostels:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchStudentsByHostel = async (hostelId: string) => {
+    try {
+      setLoading(true)
+      const response = await fetch(`http://localhost:5001/api/students/hostel/${hostelId}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch students')
+      }
+      const data = await response.json()
+      setStudents(prev => ({
+        ...prev,
+        [hostelId]: data
+      }))
+    } catch (error) {
+      message.error('Failed to load students')
+      console.error('Error fetching students:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleHostelChange = (value: string) => {
     setSelectedHostel(value)
@@ -81,21 +84,36 @@ export function Students() {
   }
 
   const handleResetPassword = async () => {
+    if (!selectedStudent) return;
+    
     try {
-      // Here you would typically make an API call to reset the password
-      message.success(`Password reset for ${selectedStudent?.name}`)
+      const response = await fetch(`http://localhost:5001/api/students/${selectedStudent._id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          newPassword: resetForm.getFieldValue('newPassword') 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reset password');
+      }
+
+      message.success(`Password reset for ${selectedStudent.name}`)
       setIsResetModalVisible(false)
       resetForm.resetFields()
-    } catch {
+    } catch (error) {
       message.error("Failed to reset password")
+      console.error('Error resetting password:', error)
     }
   }
 
   const filteredStudents = selectedHostel
-    ? mockStudents[selectedHostel]?.filter(student =>
+    ? students[selectedHostel]?.filter(student =>
         student.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        student.email.toLowerCase().includes(searchText.toLowerCase()) ||
-        student.roomNumber.includes(searchText)
+        student.email.toLowerCase().includes(searchText.toLowerCase())
       ) || []
     : []
 
@@ -112,27 +130,10 @@ export function Students() {
       key: "email"
     },
     {
-      title: "Room Number",
-      dataIndex: "roomNumber",
-      key: "roomNumber",
-      sorter: (a: Student, b: Student) => a.roomNumber.localeCompare(b.roomNumber)
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone"
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-        }`}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
-      )
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleDateString()
     },
     {
       title: "Actions",
@@ -167,11 +168,12 @@ export function Students() {
             optionFilterProp="children"
             onChange={handleHostelChange}
             value={selectedHostel}
+            loading={loading}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
             }
-            options={mockHostels.map(hostel => ({
-              value: hostel.id,
+            options={hostels.map(hostel => ({
+              value: hostel._id,
               label: hostel.name
             }))}
           />
@@ -188,8 +190,9 @@ export function Students() {
         <Table
           dataSource={filteredStudents}
           columns={columns}
-          rowKey="id"
+          rowKey="_id"
           pagination={{ pageSize: 10 }}
+          loading={loading}
         />
       </Card>
 

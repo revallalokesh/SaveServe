@@ -1,11 +1,13 @@
-import { AdminLogin } from "./components/AdminLogin";
+'use client';
+import { useAuth } from "./components/AuthContext";
 import { AdminNavBar } from "./components/AdminNavBar";
 
+
 export default function Home() {
+  const { isLoggedIn } = useAuth();
   return (
     <div className="flex justify-center items-center h-screen">
-      <AdminNavBar />
-      <AdminLogin />
+      {isLoggedIn ? <AdminNavBar /> : null}
     </div>
   );
 }

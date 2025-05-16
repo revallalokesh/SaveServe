@@ -7,10 +7,24 @@ const auth = require('../middleware/auth');
 router.get('/', async (req, res) => {
   try {
     const hostels = await Hostel.find()
-      .select('name') // Only return hostel name and ID
       .sort({ createdAt: -1 })
       .lean();
-    res.json(hostels);
+    
+    console.log('Raw hostels from DB:', hostels); // Debug log
+    
+    // Map the data to include all required fields
+    const mappedHostels = hostels.map(hostel => ({
+      _id: hostel._id,
+      name: hostel.name,
+      owner: hostel.owner,
+      email: hostel.email,
+      username: hostel.username,
+      address: hostel.address,
+      createdAt: hostel.createdAt
+    }));
+
+    console.log('Mapped hostels:', mappedHostels); // Debug log
+    res.json(mappedHostels);
   } catch (error) {
     console.error('Error getting hostels:', error);
     res.status(500).json({ message: error.message });
