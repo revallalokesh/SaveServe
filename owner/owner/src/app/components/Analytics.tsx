@@ -125,7 +125,7 @@ export default function Analytics() {
       });
       
       const response = await fetch(
-        `/api/student-meal-status/analytics/${formattedDate}?hostelId=${hostelId}`,
+        `https://save-serve-server.onrender.com/api/student-meal-status/analytics/${formattedDate}?hostelId=${hostelId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -268,7 +268,7 @@ export default function Analytics() {
         }
       }));
 
-      const response = await fetch('/api/student-meal-status/update-bulk', {
+      const response = await fetch('https://save-serve-server.onrender.com/api/student-meal-status/update-bulk', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
