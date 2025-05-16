@@ -1,10 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import DottedMap from "dotted-map";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 
 interface MapProps {
   dots?: Array<{
@@ -19,16 +17,33 @@ export function WorldMap({
   lineColor = "#0ea5e9",
 }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const map = new DottedMap({ height: 100, grid: "diagonal" });
-
-  const { theme } = useTheme();
-
-  const svgMap = map.getSVG({
-    radius: 0.22,
-    color: "#fff",
-    shape: "circle",
-    backgroundColor: "black",
-  });
+  const [svgMap, setSvgMap] = useState<string>('');
+  
+  useEffect(() => {
+    // Create the map when component mounts (client-side only)
+    const loadMap = async () => {
+      try {
+        // Dynamic import of dotted-map only when needed
+        const DottedMapModule = await import('dotted-map');
+        const DottedMapConstructor = DottedMapModule.default;
+        
+        const map = new DottedMapConstructor({ height: 100, grid: "diagonal" });
+        
+        const generatedSvg = map.getSVG({
+          radius: 0.22,
+          color: "#fff",
+          shape: "circle",
+          backgroundColor: "black",
+        });
+        
+        setSvgMap(generatedSvg);
+      } catch (error) {
+        console.error('Failed to load map:', error);
+      }
+    };
+    
+    loadMap();
+  }, []);
 
   const projectPoint = (lat: number, lng: number) => {
     const x = (lng + 180) * (800 / 360);
@@ -44,6 +59,10 @@ export function WorldMap({
     const midY = Math.min(start.y, end.y) - 50;
     return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
   };
+
+  if (!svgMap) {
+    return <div className="absolute inset-0 h-full w-full bg-black" />;
+  }
 
   return (
     <div className="absolute inset-0 h-full w-full pointer-events-none font-sans bg-black">

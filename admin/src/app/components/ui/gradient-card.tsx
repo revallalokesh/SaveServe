@@ -14,7 +14,7 @@ export interface GradientCardProps {
 export const GradientCard: React.FC<GradientCardProps> = ({ _id, name, address, owner, onDelete }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [, setMousePosition] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
 
   // Handle mouse movement for 3D effect

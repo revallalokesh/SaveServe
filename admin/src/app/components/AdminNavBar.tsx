@@ -1,20 +1,20 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "./AuthContext"
-import { Home, Building2, Users, GraduationCap, Utensils, Settings, LogOut } from "lucide-react"
+import { Home, Building2, Users, GraduationCap, Utensils, LogOut } from "lucide-react"
 import { NavBar as TubelightNavBar } from "./ui/tubelight-navbar"
 
 interface NavItem {
   name: string
   url: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType
 }
 
 export function AdminNavBar() {
-  const { isLoggedIn, userData, logout } = useAuth()
+  const { isLoggedIn, logout } = useAuth()
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState("")
@@ -29,7 +29,6 @@ export function AdminNavBar() {
     { name: "Owners", url: "/owners", icon: Users },
     { name: "Students", url: "/students", icon: GraduationCap },
     { name: "Food Menu", url: "/menu", icon: Utensils },
-    
   ]
 
   const handleNavClick = (item: NavItem) => {
@@ -47,7 +46,7 @@ export function AdminNavBar() {
     setLogoutError("")
     try {
       await logout()
-    } catch (error) {
+    } catch {
       setLogoutError("Failed to logout. Please try again.")
       setIsLoggingOut(false)
     }

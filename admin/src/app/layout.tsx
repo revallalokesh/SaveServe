@@ -18,6 +18,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Admin Dashboard - Save Serve",
   description: "Admin dashboard for Save Serve Hostel Food Management System",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/saveserve_icon.ico" }
+    ],
+    shortcut: "/saveserve_icon.ico",
+    apple: "/saveserve_icon.ico",
+  },
 };
 
 export default function RootLayout({

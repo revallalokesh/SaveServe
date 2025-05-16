@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Save Serve",
   description: "Hostel Food Management System",
+  icons: {
+    icon: "/saveserve_icon.ico",
+    shortcut: "/saveserve_icon.ico",
+    apple: "/saveserve_icon.ico",
+  },
 };
 
 export default function RootLayout({

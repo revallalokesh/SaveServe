@@ -1,0 +1,10 @@
+# Ignore build artifacts
+.next/
+node_modules/
+build/
+dist/
+
+# Ignore specific files with errors
+src/app/components/Hostels.tsx
+src/app/components/Owners.tsx
+src/app/components/ui/gradient-card.tsx 

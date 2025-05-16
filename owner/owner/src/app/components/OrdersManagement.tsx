@@ -6,7 +6,7 @@ import { Calendar as CalendarIcon, ArrowUpDown, Check, X, Loader2 } from "lucide
 import { cn } from "@/lib/utils"
 
 // Mock these components with simplified versions if they can't be imported
-const Calendar = ({ selected, onSelect, mode, initialFocus, className }: any) => (
+const Calendar = ({ selected}: any) => (
   <div className="calendar p-4 border rounded bg-background">
     <div className="text-center">{selected ? format(selected, "PPP") : "Select a date"}</div>
   </div>
@@ -90,11 +90,11 @@ const Popover = ({ children }: any) => (
   <div>{children}</div>
 )
 
-const PopoverTrigger = ({ children, asChild }: any) => (
+const PopoverTrigger = ({ children }: any) => (
   <div>{children}</div>
 )
 
-const PopoverContent = ({ children, className, align, sideOffset }: any) => (
+const PopoverContent = ({ children, className }: any) => (
   <div className={cn("z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md", className)}>
     {children}
   </div>

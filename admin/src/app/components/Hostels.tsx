@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Table, Modal, Form, Input, message, Card } from "antd"
-import { motion, AnimatePresence } from "framer-motion"
+import {  Modal, Form, Input, message } from "antd"
+import { motion } from "framer-motion"
 import { 
   HomeOutlined,
   UserOutlined,

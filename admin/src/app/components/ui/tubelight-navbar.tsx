@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import Link from "next/link"
-import { LucideIcon } from "lucide-react"
 import { cn } from "@/app/lib/utils"
 
 interface NavItem {
   name: string
   url: string
-  // icon: LucideIcon // Remove icon for text-only tabs
+  icon?: React.ComponentType
   onClick?: () => void
+  isActive?: boolean
 }
 
 interface NavBarProps {
@@ -20,17 +19,15 @@ interface NavBarProps {
 
 export function NavBar({ items, className }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0].name)
-  const [isMobile, setIsMobile] = useState(false)
   const [hoveredTab, setHoveredTab] = useState<string | null>(null)
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
+    // Check first active item on mount
+    const activeItem = items.find(item => item.isActive);
+    if (activeItem) {
+      setActiveTab(activeItem.name);
     }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+  }, [items]);
 
   return (
     <div

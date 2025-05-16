@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Table, Button, Modal, Form, Input, message, Card, Spin } from "antd"
+import { Table, Button, Modal, Form, Input, message, Card } from "antd"
 import { SearchOutlined, KeyOutlined, PlusOutlined } from "@ant-design/icons"
 import { useAuth } from "./AuthContext"
 
