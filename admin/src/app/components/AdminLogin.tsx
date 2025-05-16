@@ -27,15 +27,27 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         body: JSON.stringify({ email, password }),
         credentials: 'include',
       })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Login failed')
+      }
+      
       const data = await response.json()
-      if (!response.ok) throw new Error(data.message || 'Login failed')
       
+      // Set login state in context
       login(data.token, data.user)
-      onLoginSuccess?.()
       
-      // Handle return URL if present
+      // Call success callback if provided
+      if (onLoginSuccess) {
+        onLoginSuccess()
+      }
+      
+      // Get return URL from query parameters
       const returnUrl = searchParams.get('returnUrl')
-      if (returnUrl && returnUrl.startsWith('/')) {
+      
+      // Redirect to intended destination or dashboard
+      if (returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('/login')) {
         router.push(returnUrl)
       } else {
         router.push("/dashboard")

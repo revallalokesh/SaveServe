@@ -3,7 +3,7 @@ const nextConfig = {
   /* config options here */
   compress: true, // Enable gzip compression
   poweredByHeader: false, // Remove X-Powered-By header
-  reactStrictMode: true,
+  reactStrictMode: false, // Disable React strict mode to prevent double-rendering
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
@@ -31,6 +31,16 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  // Add redirects
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard',
+        permanent: false,
+      },
+    ]
+  }
 };
 
 module.exports = nextConfig; 

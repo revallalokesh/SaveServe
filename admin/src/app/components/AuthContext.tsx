@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 interface UserData {
   id: string;
@@ -15,6 +16,7 @@ interface AuthContextType {
   userData: UserData | null;
   login: (token: string, user: UserData) => void;
   logout: () => Promise<void>;
+  isInitialized: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,22 +24,37 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // Check session on mount
-    const token = Cookies.get('auth_token');
-    const userDataStr = Cookies.get('user_data');
-    
-    if (token && userDataStr) {
+    const loadAuth = async () => {
       try {
-        const userData = JSON.parse(userDataStr);
-        setIsLoggedIn(true);
-        setUserData(userData);
-      } catch (error) {
-        console.error('Session restoration failed:', error);
-        handleLogout();
+        const token = Cookies.get('auth_token');
+        const userDataStr = Cookies.get('user_data');
+        
+        if (token && userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            setIsLoggedIn(true);
+            setUserData(userData);
+          } catch (error) {
+            console.error('Session restoration failed:', error);
+            // Don't call handleLogout here as it might cause a loop
+            Cookies.remove('auth_token');
+            Cookies.remove('user_data');
+            setIsLoggedIn(false);
+            setUserData(null);
+          }
+        }
+      } finally {
+        // Mark authentication as initialized so app knows state is ready
+        setIsInitialized(true);
       }
-    }
+    };
+
+    loadAuth();
   }, []);
 
   const login = (token: string, user: UserData) => {
@@ -75,13 +92,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoggedIn(false);
       setUserData(null);
       
-      // Force a hard reload to clear any cached state
-      window.location.href = '/login';
+      // Use NextJS router instead of window.location
+      router.push('/login');
     }
+    
+    return Promise.resolve();
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userData, login, logout: handleLogout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userData, login, logout: handleLogout, isInitialized }}>
       {children}
     </AuthContext.Provider>
   );

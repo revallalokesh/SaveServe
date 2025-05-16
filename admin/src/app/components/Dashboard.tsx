@@ -1,27 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { SpiralAnimation } from "./ui/spiral-animation"
 import { motion } from "framer-motion"
+import { useAuth } from "./AuthContext"
 
 export function Dashboard() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const { userData, isLoggedIn, isInitialized } = useAuth()
   const [spiralProgress, setSpiralProgress] = useState(0)
 
-  useEffect(() => {
-    const userData = localStorage.getItem('userData')
-    setIsLoggedIn(!!userData)
-    setIsLoading(false)
-
-    if (!userData) {
-      router.push('/login')
-    }
-  }, [router])
-
-  if (isLoading) {
+  // Wait for auth to initialize before rendering content
+  if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -29,20 +18,8 @@ export function Dashboard() {
     )
   }
 
-  if (!isLoggedIn) {
-    return null
-  }
-
-  // Get admin name from localStorage
-  let adminName = "Admin"
-  if (typeof window !== "undefined") {
-    const userData = localStorage.getItem('userData')
-    if (userData) {
-      try {
-        adminName = JSON.parse(userData).name || "Admin"
-      } catch {}
-    }
-  }
+  // Admin name from context
+  const adminName = userData?.name || "Admin"
 
   return (
     <div className="fixed inset-0 w-full h-full min-h-screen overflow-hidden">

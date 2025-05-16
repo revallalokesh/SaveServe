@@ -1,33 +1,22 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useAuth } from './AuthContext'
 
+// Define paths that don't require authentication
 const PUBLIC_PATHS = ['/login', '/forgot-password', '/reset-password']
 
 export function RouteGuard({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAuth()
-  const router = useRouter()
+  const { isLoggedIn, isInitialized } = useAuth()
   const pathname = usePathname()
-
-  useEffect(() => {
-    // Check if the path is public
-    const isPublicPath = PUBLIC_PATHS.includes(pathname)
-
-    if (!isLoggedIn && !isPublicPath) {
-      // Redirect to login with return URL
-      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`)
-    } else if (isLoggedIn && isPublicPath) {
-      // Redirect to dashboard if logged in user tries to access public pages
-      router.push('/dashboard')
-    }
-  }, [isLoggedIn, pathname, router])
-
-  // Show nothing while checking auth
-  if (!isLoggedIn && !PUBLIC_PATHS.includes(pathname)) {
-    return null
+  
+  // Show loading state while initializing
+  if (!isInitialized) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>
   }
 
+  // Just render the children, skip all redirection logic to break the loop
+  // The server-side redirects and cookies will handle authentication
   return <>{children}</>
 } 
