@@ -202,49 +202,109 @@ router.get('/analytics/:date', auth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid Hostel ID format' });
     }
 
-    // Aggregate to get counts for each meal type
-    const mealCounts = await MealSelection.aggregate([
-      {
-        $match: {
-          hostelId: hostelObjectId,
-          date: date
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalBreakfast: {
-            $sum: { $cond: [{ $eq: ["$meals.breakfast.selected", true] }, 1, 0] }
-          },
-          totalLunch: {
-            $sum: { $cond: [{ $eq: ["$meals.lunch.selected", true] }, 1, 0] }
-          },
-          totalDinner: {
-            $sum: { $cond: [{ $eq: ["$meals.dinner.selected", true] }, 1, 0] }
-          },
-          totalStudents: { $sum: 1 }
-        }
-      }
-    ]);
+    // Get all meal selections for the date
+    const mealSelections = await MealSelection.find({
+      hostelId: hostelObjectId,
+      date: date
+    });
 
-    const analytics = mealCounts.length > 0 ? {
-      breakfast: mealCounts[0].totalBreakfast,
-      lunch: mealCounts[0].totalLunch,
-      dinner: mealCounts[0].totalDinner,
-      totalStudents: mealCounts[0].totalStudents
-    } : {
-      breakfast: 0,
-      lunch: 0,
-      dinner: 0,
-      totalStudents: 0
+    // Calculate analytics
+    const analytics = {
+      breakfast: mealSelections.filter(ms => ms.meals.breakfast.selected).length,
+      lunch: mealSelections.filter(ms => ms.meals.lunch.selected).length,
+      dinner: mealSelections.filter(ms => ms.meals.dinner.selected).length,
+      totalStudents: mealSelections.length,
+      studentStatuses: mealSelections.map(ms => ({
+        studentId: ms.studentId,
+        studentName: ms.studentName,
+        breakfast: ms.meals.breakfast.selected,
+        lunch: ms.meals.lunch.selected,
+        dinner: ms.meals.dinner.selected
+      }))
     };
 
-    console.log(`[Server] Analytics for date ${date}, hostel ${hostelId}:`, analytics);
+    console.log(`[Server] Analytics for date ${date}, hostel ${hostelId}:`, {
+      ...analytics,
+      studentCount: analytics.studentStatuses.length
+    });
     res.json(analytics);
 
   } catch (error) {
     console.error('[Server] Error fetching meal analytics:', error);
     res.status(500).json({ error: 'Error fetching meal analytics' });
+  }
+});
+
+// Bulk update meal statuses
+router.post('/update-bulk', auth, async (req, res) => {
+  try {
+    const { hostelId, date, studentStatuses } = req.body;
+
+    if (!hostelId || !date || !Array.isArray(studentStatuses)) {
+      return res.status(400).json({ error: 'Missing or invalid required fields' });
+    }
+
+    // Convert hostelId string to ObjectId
+    let hostelObjectId;
+    try {
+      hostelObjectId = new mongoose.Types.ObjectId(hostelId);
+    } catch (err) {
+      console.error("Invalid Hostel ID format:", hostelId);
+      return res.status(400).json({ error: 'Invalid Hostel ID format' });
+    }
+
+    // Process each student's meal status
+    const updatePromises = studentStatuses.map(async (status) => {
+      try {
+        const studentId = new mongoose.Types.ObjectId(status.studentId);
+        
+        // Find or create meal selection
+        let mealSelection = await MealSelection.findOne({
+          studentId,
+          hostelId: hostelObjectId,
+          date
+        });
+
+        if (!mealSelection) {
+          // If no record exists, skip this student
+          console.warn(`No meal selection found for student ${status.studentId} on ${date}`);
+          return;
+        }
+
+        // Update meal selections
+        if (status.meals) {
+          if (status.meals.breakfast) {
+            mealSelection.meals.breakfast.selected = status.meals.breakfast.selected;
+            if (status.meals.breakfast.selected) {
+              mealSelection.meals.breakfast.qrCode = generateQRCode(studentId.toString(), hostelId, 'breakfast', date);
+            }
+          }
+          if (status.meals.lunch) {
+            mealSelection.meals.lunch.selected = status.meals.lunch.selected;
+            if (status.meals.lunch.selected) {
+              mealSelection.meals.lunch.qrCode = generateQRCode(studentId.toString(), hostelId, 'lunch', date);
+            }
+          }
+          if (status.meals.dinner) {
+            mealSelection.meals.dinner.selected = status.meals.dinner.selected;
+            if (status.meals.dinner.selected) {
+              mealSelection.meals.dinner.qrCode = generateQRCode(studentId.toString(), hostelId, 'dinner', date);
+            }
+          }
+        }
+
+        await mealSelection.save();
+      } catch (error) {
+        console.error(`Error updating meal status for student ${status.studentId}:`, error);
+      }
+    });
+
+    await Promise.all(updatePromises);
+
+    res.json({ message: 'Meal statuses updated successfully' });
+  } catch (error) {
+    console.error('[Server] Error in bulk update:', error);
+    res.status(500).json({ error: 'Error updating meal statuses' });
   }
 });
 
