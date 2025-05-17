@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react"
 import { Table, Button, Modal, Form, Input, message, Card } from "antd"
 import { SearchOutlined, KeyOutlined, PlusOutlined } from "@ant-design/icons"
 import { useAuth } from "./AuthContext"
+import Cookies from 'js-cookie'
 
 interface Owner {
   id: string
@@ -45,7 +46,7 @@ export function Owners() {
       setIsLoading(true)
       setError(null)
       
-      const token = localStorage.getItem('token')
+      const token = Cookies.get('auth_token')
       if (!token) {
         throw new Error('No authentication token found')
       }
@@ -112,11 +113,16 @@ export function Owners() {
     try {
       if (!selectedOwner) return
       
+      const token = Cookies.get('auth_token')
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
+      
       const response = await fetch(`https://save-serve-server.onrender.com/api/hostels/${selectedOwner.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ password: values.newPassword })
       })
@@ -137,11 +143,16 @@ export function Owners() {
 
   const handleCreateOwner = async (values: CreateOwnerForm) => {
     try {
+      const token = Cookies.get('auth_token')
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
+      
       const response = await fetch('https://save-serve-server.onrender.com/api/hostels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(values)
       })
@@ -163,10 +174,15 @@ export function Owners() {
 
   const handleDeleteOwner = async (id: string) => {
     try {
+      const token = Cookies.get('auth_token')
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
+      
       const response = await fetch(`https://save-serve-server.onrender.com/api/hostels/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       })
 

@@ -12,75 +12,85 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 
 const getQrKey = (studentId: string, date: string, meal: string) => `qr_${studentId}_${date}_${meal}`;
 
-const getDateOfWeekday = (weekday: string) => {
-  const today = new Date();
-  const currentDay = today.getDay(); // 0 (Sun) - 6 (Sat)
-  const targetDay = daysOfWeek.indexOf(weekday);
-  // Adjust for Sunday (0)
-  const diff = targetDay + 1 - (currentDay === 0 ? 7 : currentDay);
-  const date = new Date(today);
-  date.setDate(today.getDate() + diff);
-  return date.toISOString().split('T')[0];
+// Get current day of week as string (e.g., "Monday")
+const getCurrentDayOfWeek = (): string => {
+  const dayIndex = new Date().getDay(); // 0 is Sunday, 6 is Saturday
+  // Convert to our daysOfWeek array index (0 is Monday, 6 is Sunday)
+  const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+  return daysOfWeek[adjustedIndex];
+};
 
+// Get today's date in YYYY-MM-DD format
+const getTodayDate = (): string => {
+  return new Date().toISOString().split('T')[0];
 };
 
 const YourMeals: React.FC = () => {
-  const [, setStudentId] = useState<string | null>(null);
+  const [studentId, setStudentId] = useState<string | null>(null);
   const [qrData, setQrData] = useState<{ [key: string]: string | null }>({});
-
+  const [currentDay] = useState<string>(getCurrentDayOfWeek());
+  const [todayDate] = useState<string>(getTodayDate());
 
   useEffect(() => {
     const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
-    setStudentId(studentData.id || null);
-    // Load all QRs for the week from localStorage
+    const sid = studentData.id || null;
+    setStudentId(sid);
+    
+    // Load today's QRs from localStorage
     const qrMap: { [key: string]: string | null } = {};
-    daysOfWeek.forEach(day => {
-      const date = getDateOfWeekday(day);
-      mealTypes.forEach(meal => {
-        const key = `${date}_${meal}`;
-        const qrKey = getQrKey(studentData.id, date, meal);
-        qrMap[key] = localStorage.getItem(qrKey);
-      });
-    });
+    
+    // Check all QR-related localStorage entries
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(`qr_${sid}`)) {
+        const value = localStorage.getItem(key);
+        
+        // Extract the meal type from the key
+        const keyParts = key.split('_');
+        if (keyParts.length >= 4) {
+          const meal = keyParts[3]; // breakfast, lunch, or dinner
+          
+          // Store the QR code using the meal as key
+          if (mealTypes.includes(meal as any)) {
+            qrMap[meal] = value;
+          }
+        }
+      }
+    }
+    
     setQrData(qrMap);
   }, []);
 
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl mt-20">
-      <Title level={2} className="mb-8 text-center">Your Meals & QRs (This Week)</Title>
-      {daysOfWeek.map((day, i) => {
-        const date = getDateOfWeekday(day);
-        return (
-          <motion.div
-            key={day}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07, type: 'spring', stiffness: 120 }}
-          >
-            <Card className="mb-6 rounded-2xl shadow-sm border border-gray-100">
-              <Title level={4} className="mb-2">{day} ({date})</Title>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mealTypes.map(meal => {
-                  const qr = qrData[`${date}_${meal}`];
-                  return (
-                    <div key={meal} className="flex flex-col items-center">
-                      <Text className="font-semibold capitalize mb-2">{meal}</Text>
-                      {qr ? (
-                        <motion.div whileHover={{ scale: 1.08 }}>
-                          <QRCode value={qr} />
-                        </motion.div>
-                      ) : (
-                        <Text type="secondary">No QR found</Text>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
-          </motion.div>
-        );
-      })}
+      <Title level={2} className="mb-8 text-center">Today's Meals & QRs</Title>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 120 }}
+      >
+        <Card className="mb-6 rounded-2xl shadow-sm border border-gray-100">
+          <Title level={4} className="mb-2">{currentDay} ({todayDate})</Title>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {mealTypes.map(meal => {
+              const qr = qrData[meal];
+              return (
+                <div key={meal} className="flex flex-col items-center">
+                  <Text className="font-semibold capitalize mb-2">{meal}</Text>
+                  {qr ? (
+                    <motion.div whileHover={{ scale: 1.08 }}>
+                      <QRCode value={qr} />
+                    </motion.div>
+                  ) : (
+                    <Text type="secondary">No QR found</Text>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </motion.div>
     </div>
   );
 };
