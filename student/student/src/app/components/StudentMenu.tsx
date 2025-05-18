@@ -171,7 +171,7 @@ const StudentMenu: React.FC = () => {
       }
     };
     fetchExistingSelections();
-  }, []);
+  }, [mealOptions]);
 
   function getCurrentDay(): string {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

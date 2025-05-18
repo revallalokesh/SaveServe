@@ -10,8 +10,6 @@ const { Title, Text } = Typography;
 const mealTypes = ['breakfast', 'lunch', 'dinner'] as const;
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-const getQrKey = (studentId: string, date: string, meal: string) => `qr_${studentId}_${date}_${meal}`;
-
 // Get current day of week as string (e.g., "Monday")
 const getCurrentDayOfWeek = (): string => {
   const dayIndex = new Date().getDay(); // 0 is Sunday, 6 is Saturday
@@ -26,7 +24,7 @@ const getTodayDate = (): string => {
 };
 
 const YourMeals: React.FC = () => {
-  const [studentId, setStudentId] = useState<string | null>(null);
+  const [, setStudentId] = useState<string | null>(null);
   const [qrData, setQrData] = useState<{ [key: string]: string | null }>({});
   const [currentDay] = useState<string>(getCurrentDayOfWeek());
   const [todayDate] = useState<string>(getTodayDate());
@@ -51,7 +49,7 @@ const YourMeals: React.FC = () => {
           const meal = keyParts[3]; // breakfast, lunch, or dinner
           
           // Store the QR code using the meal as key
-          if (mealTypes.includes(meal as any)) {
+          if (mealTypes.includes(meal as typeof mealTypes[number])) {
             qrMap[meal] = value;
           }
         }
@@ -63,7 +61,7 @@ const YourMeals: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl mt-20">
-      <Title level={2} className="mb-8 text-center">Today's Meals & QRs</Title>
+      <Title level={2} className="mb-8 text-center">Today&apos;s Meals &amp; QRs</Title>
       
       <motion.div
         initial={{ opacity: 0, y: 30 }}
