@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { NavBar } from './components/NavBar';
-import { Html } from './components/ui/hero-futuristic';
+import DatabaseWithRestApi from './components/ui/hero-futuristic';
 import StudentLogin from './components/StudentLogin';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,8 +14,23 @@ export default function Page() {
       <NavBar />
       <div className="relative w-full h-screen bg-black">
         {/* Hero section as background */}
-        <div className="absolute inset-0 z-0">
-          <Html />
+        <div className="absolute inset-0 z-0 flex items-center justify-center p-6 sm:p-8">
+          <DatabaseWithRestApi 
+            title="Smart Campus Dining Management System" 
+            circleText="Save"
+            badgeTexts={{
+              first: "QR Meals",
+              second: "Food Waste",
+              third: "Ratings",
+              fourth: "Campus"
+            }}
+            buttonTexts={{
+              first: "SaveServes",
+              second: "Campus App"
+            }}
+            lightColor="#22c55e"
+            className="scale-[0.85] sm:scale-100 text-white"
+          />
         </div>
         
         {/* Login button */}
