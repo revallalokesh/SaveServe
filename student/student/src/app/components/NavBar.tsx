@@ -58,6 +58,8 @@ export function NavBar({ items = [], className }: NavBarProps) {
       try {
         const response = await fetch('https://save-serve-server.onrender.com/api/hostels');
         if (!response.ok) {
+          // Log the status code when the response is not OK
+          console.error('Fetch hostels failed with status:', response.status);
           throw new Error('Failed to fetch hostels');
         }
         const data = await response.json();
