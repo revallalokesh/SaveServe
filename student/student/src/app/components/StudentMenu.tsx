@@ -29,8 +29,6 @@ interface DayMeals {
   dinner: MealOption;
 }
 
-
-
 interface DayMenuData {
   breakfast: string[];
   lunch: string[];
