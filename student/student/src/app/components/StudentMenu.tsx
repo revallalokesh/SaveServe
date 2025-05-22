@@ -10,10 +10,9 @@ import QRCode from 'antd/es/qrcode';
 import message from 'antd/es/message';
 import Table from 'antd/es/table';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, AlertCircle, Leaf, Globe } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import type { TabsProps } from 'antd/es/tabs';
 import './menu.css';
-import { motion } from 'framer-motion';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -30,6 +29,19 @@ interface DayMeals {
   dinner: MealOption;
 }
 
+interface WeeklyMenu {
+  [key: string]: {
+    breakfast: string[];
+    lunch: string[];
+    dinner: string[];
+  };
+}
+
+interface MenuItem {
+  name: string;
+  description?: string;
+  type: 'breakfast' | 'lunch' | 'dinner';
+}
 
 interface DayMenuData {
   breakfast: string[];
@@ -50,7 +62,7 @@ interface WeeklyMenuData {
 
 const StudentMenu: React.FC = () => {
   const router = useRouter();
-  const [selectedDay, ] = useState<string>(getCurrentDay());
+  const [selectedDay, setSelectedDay] = useState<string>(getCurrentDay());
   const [mealOptions, setMealOptions] = useState<DayMeals>({
     breakfast: { opted: false, locked: false, submitted: false },
     lunch: { opted: false, locked: false, submitted: false },
@@ -76,9 +88,6 @@ const StudentMenu: React.FC = () => {
   const getMealItems = (day: string, type: 'breakfast' | 'lunch' | 'dinner'): string[] => {
     return weeklyMenu[day]?.[type] || [];
   };
-
-  // Helper to get QR key for localStorage
-  const getQrKey = (studentId: string, date: string, meal: string) => `qr_${studentId}_${date}_${meal}`;
 
   useEffect(() => {
     // Get student data from localStorage
@@ -137,7 +146,7 @@ const StudentMenu: React.FC = () => {
       try {
         const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
         const studentId = studentData.id;
-        const today = new Date().toISOString().split('T')[0];
+        
         if (!studentId) return;
 
         const response = await fetch(`https://save-serve-server.onrender.com/api/student-menu/selections/${studentId}`, {
@@ -151,27 +160,40 @@ const StudentMenu: React.FC = () => {
         }
 
         const data = await response.json();
-        // Try to load QR from localStorage if available
-        const meals = ['breakfast', 'lunch', 'dinner'] as (keyof DayMeals)[];
-        const newMealOptions = { ...mealOptions };
-        meals.forEach(meal => {
-          const qrKey = getQrKey(studentId, today, meal);
-          const localQr = localStorage.getItem(qrKey);
-          newMealOptions[meal] = {
-            ...newMealOptions[meal],
-            opted: data.meals[meal]?.selected || false,
-            locked: data.meals[meal]?.selected || false,
-            submitted: data.meals[meal]?.selected || false,
-            qrCode: localQr || data.meals[meal]?.qrCode || null
-          };
-        });
-        setMealOptions(newMealOptions);
+        
+        if (data && data.meals) {
+          setMealOptions(prev => ({
+            ...prev,
+            breakfast: {
+              ...prev.breakfast,
+              opted: data.meals.breakfast?.selected || false,
+              locked: data.meals.breakfast?.selected || false,
+              submitted: data.meals.breakfast?.selected || false,
+              qrCode: data.meals.breakfast?.qrCode || null
+            },
+            lunch: {
+              ...prev.lunch,
+              opted: data.meals.lunch?.selected || false,
+              locked: data.meals.lunch?.selected || false,
+              submitted: data.meals.lunch?.selected || false,
+              qrCode: data.meals.lunch?.qrCode || null
+            },
+            dinner: {
+              ...prev.dinner,
+              opted: data.meals.dinner?.selected || false,
+              locked: data.meals.dinner?.selected || false,
+              submitted: data.meals.dinner?.selected || false,
+              qrCode: data.meals.dinner?.qrCode || null
+            }
+          }));
+        }
       } catch (error) {
         console.error('Error fetching existing selections:', error);
       }
     };
+
     fetchExistingSelections();
-  }, [mealOptions]);
+  }, []);
 
   function getCurrentDay(): string {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -198,13 +220,14 @@ const StudentMenu: React.FC = () => {
       message.warning('This meal has already been submitted');
       return;
     }
+
     try {
       const studentData = JSON.parse(localStorage.getItem('studentData') || '{}');
       const studentId = studentData.id;
       const hostelId = studentData.hostel?.id;
       const studentName = studentData.name;
       const studentEmail = studentData.email;
-      const today = new Date().toISOString().split('T')[0];
+
       // Validate IDs
       if (!studentId || !hostelId) {
         throw new Error('Student or hostel ID not found');
@@ -256,11 +279,8 @@ const StudentMenu: React.FC = () => {
       }
 
       const data = await response.json();
-      // Save QR to localStorage for offline access
-      const qrKey = getQrKey(studentId, today, meal);
-      if (data.qrCodes[meal]) {
-        localStorage.setItem(qrKey, data.qrCodes[meal]);
-      }
+      console.log('Success response:', data);
+      
       setMealOptions(prev => ({
         ...prev,
         [meal]: {
@@ -270,6 +290,7 @@ const StudentMenu: React.FC = () => {
           qrCode: data.qrCodes[meal]
         }
       }));
+
       message.success(`${meal.charAt(0).toUpperCase() + meal.slice(1)} selection submitted successfully!`);
     } catch (error) {
       console.error('Error submitting meal selection:', error);
@@ -282,147 +303,129 @@ const StudentMenu: React.FC = () => {
       key: 'breakfast',
       label: 'Breakfast',
       children: (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 120 }}
-        >
-          <Card>
-            <div className="meal-option">
-              <div className="meal-header">
-                <Title level={4}>Breakfast</Title>
-                <Switch
-                  checked={mealOptions.breakfast.opted}
-                  onChange={() => handleMealToggle('breakfast')}
-                  disabled={mealOptions.breakfast.locked || mealOptions.breakfast.submitted}
-                />
-              </div>
-              <div className="meal-items">
-                {getMealItems(selectedDay, 'breakfast').length > 0 ? (
-                  getMealItems(selectedDay, 'breakfast').map((item: string, index: number) => (
-                    <Text key={index} className="menu-item">{item}</Text>
-                  ))
-                ) : (
-                  <Text type="secondary">No breakfast items listed for today.</Text>
-                )}
-              </div>
-              {mealOptions.breakfast.qrCode && mealOptions.breakfast.submitted ? (
-                <motion.div className="qr-code" whileHover={{ scale: 1.08 }}>
-                  <QRCode value={mealOptions.breakfast.qrCode} />
-                </motion.div>
+        <Card>
+          <div className="meal-option">
+            <div className="meal-header">
+              <Title level={4}>Breakfast</Title>
+              <Switch
+                checked={mealOptions.breakfast.opted}
+                onChange={() => handleMealToggle('breakfast')}
+                disabled={mealOptions.breakfast.locked || mealOptions.breakfast.submitted}
+              />
+            </div>
+            <div className="meal-items">
+              {getMealItems(selectedDay, 'breakfast').length > 0 ? (
+                getMealItems(selectedDay, 'breakfast').map((item: string, index: number) => (
+                  <Text key={index} className="menu-item">{item}</Text>
+                ))
               ) : (
-                <div className="mt-4">
-                  <Button
-                    type="primary"
-                    onClick={() => handleSubmit('breakfast')}
-                    disabled={!mealOptions.breakfast.opted || mealOptions.breakfast.submitted}
-                    className="w-full"
-                  >
-                    {mealOptions.breakfast.submitted ? 'Submitted' : 'Submit Breakfast Selection'}
-                  </Button>
-                </div>
+                <Text type="secondary">No breakfast items listed for today.</Text>
               )}
             </div>
-          </Card>
-        </motion.div>
+            {mealOptions.breakfast.qrCode && mealOptions.breakfast.submitted ? (
+              <div className="qr-code">
+                <QRCode value={mealOptions.breakfast.qrCode} />
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmit('breakfast')}
+                  disabled={!mealOptions.breakfast.opted || mealOptions.breakfast.submitted}
+                  className="w-full"
+                >
+                  {mealOptions.breakfast.submitted ? 'Submitted' : 'Submit Breakfast Selection'}
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
       ),
     },
     {
       key: 'lunch',
       label: 'Lunch',
       children: (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 120 }}
-        >
-          <Card>
-            <div className="meal-option">
-              <div className="meal-header">
-                <Title level={4}>Lunch</Title>
-                <Switch
-                  checked={mealOptions.lunch.opted}
-                  onChange={() => handleMealToggle('lunch')}
-                  disabled={mealOptions.lunch.locked || mealOptions.lunch.submitted}
-                />
-              </div>
-              <div className="meal-items">
-                {getMealItems(selectedDay, 'lunch').length > 0 ? (
-                  getMealItems(selectedDay, 'lunch').map((item: string, index: number) => (
-                    <Text key={index} className="menu-item">{item}</Text>
-                  ))
-                ) : (
-                  <Text type="secondary">No lunch items listed for today.</Text>
-                )}
-              </div>
-              {mealOptions.lunch.qrCode && mealOptions.lunch.submitted ? (
-                <motion.div className="qr-code" whileHover={{ scale: 1.08 }}>
-                  <QRCode value={mealOptions.lunch.qrCode} />
-                </motion.div>
+        <Card>
+          <div className="meal-option">
+            <div className="meal-header">
+              <Title level={4}>Lunch</Title>
+              <Switch
+                checked={mealOptions.lunch.opted}
+                onChange={() => handleMealToggle('lunch')}
+                disabled={mealOptions.lunch.locked || mealOptions.lunch.submitted}
+              />
+            </div>
+            <div className="meal-items">
+              {getMealItems(selectedDay, 'lunch').length > 0 ? (
+                getMealItems(selectedDay, 'lunch').map((item: string, index: number) => (
+                  <Text key={index} className="menu-item">{item}</Text>
+                ))
               ) : (
-                <div className="mt-4">
-                  <Button
-                    type="primary"
-                    onClick={() => handleSubmit('lunch')}
-                    disabled={!mealOptions.lunch.opted || mealOptions.lunch.submitted}
-                    className="w-full"
-                  >
-                    {mealOptions.lunch.submitted ? 'Submitted' : 'Submit Lunch Selection'}
-                  </Button>
-                </div>
+                <Text type="secondary">No lunch items listed for today.</Text>
               )}
             </div>
-          </Card>
-        </motion.div>
+            {mealOptions.lunch.qrCode && mealOptions.lunch.submitted ? (
+              <div className="qr-code">
+                <QRCode value={mealOptions.lunch.qrCode} />
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmit('lunch')}
+                  disabled={!mealOptions.lunch.opted || mealOptions.lunch.submitted}
+                  className="w-full"
+                >
+                  {mealOptions.lunch.submitted ? 'Submitted' : 'Submit Lunch Selection'}
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
       ),
     },
     {
       key: 'dinner',
       label: 'Dinner',
       children: (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 120 }}
-        >
-          <Card>
-            <div className="meal-option">
-              <div className="meal-header">
-                <Title level={4}>Dinner</Title>
-                <Switch
-                  checked={mealOptions.dinner.opted}
-                  onChange={() => handleMealToggle('dinner')}
-                  disabled={mealOptions.dinner.locked || mealOptions.dinner.submitted}
-                />
-              </div>
-              <div className="meal-items">
-                {getMealItems(selectedDay, 'dinner').length > 0 ? (
-                  getMealItems(selectedDay, 'dinner').map((item: string, index: number) => (
-                    <Text key={index} className="menu-item">{item}</Text>
-                  ))
-                ) : (
-                  <Text type="secondary">No dinner items listed for today.</Text>
-                )}
-              </div>
-              {mealOptions.dinner.qrCode && mealOptions.dinner.submitted ? (
-                <motion.div className="qr-code" whileHover={{ scale: 1.08 }}>
-                  <QRCode value={mealOptions.dinner.qrCode} />
-                </motion.div>
+        <Card>
+          <div className="meal-option">
+            <div className="meal-header">
+              <Title level={4}>Dinner</Title>
+              <Switch
+                checked={mealOptions.dinner.opted}
+                onChange={() => handleMealToggle('dinner')}
+                disabled={mealOptions.dinner.locked || mealOptions.dinner.submitted}
+              />
+            </div>
+            <div className="meal-items">
+              {getMealItems(selectedDay, 'dinner').length > 0 ? (
+                getMealItems(selectedDay, 'dinner').map((item: string, index: number) => (
+                  <Text key={index} className="menu-item">{item}</Text>
+                ))
               ) : (
-                <div className="mt-4">
-                  <Button
-                    type="primary"
-                    onClick={() => handleSubmit('dinner')}
-                    disabled={!mealOptions.dinner.opted || mealOptions.dinner.submitted}
-                    className="w-full"
-                  >
-                    {mealOptions.dinner.submitted ? 'Submitted' : 'Submit Dinner Selection'}
-                  </Button>
-                </div>
+                <Text type="secondary">No dinner items listed for today.</Text>
               )}
             </div>
-          </Card>
-        </motion.div>
+            {mealOptions.dinner.qrCode && mealOptions.dinner.submitted ? (
+              <div className="qr-code">
+                <QRCode value={mealOptions.dinner.qrCode} />
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => handleSubmit('dinner')}
+                  disabled={!mealOptions.dinner.opted || mealOptions.dinner.submitted}
+                  className="w-full"
+                >
+                  {mealOptions.dinner.submitted ? 'Submitted' : 'Submit Dinner Selection'}
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
       ),
     },
   ];
@@ -463,166 +466,115 @@ const StudentMenu: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-100 px-4 py-8 flex flex-col items-center">
-      {/* Animated eco header */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 120 }}
-        className="flex flex-col items-center pt-16 mb-10"
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 shadow-lg">
-            <Leaf className="w-8 h-8 text-green-600" />
-          </span>
-          <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 shadow-lg">
-            <Globe className="w-8 h-8 text-blue-600" />
-          </span>
-        </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-emerald-700 tracking-tight text-center drop-shadow-lg">
-          Save Food, Save Earth
-        </h1>
-        <p className="text-lg text-emerald-600 mt-2 text-center max-w-xl">
-          Every meal you opt-in or opt-out helps reduce food waste and protect our planet. Thank you for making a difference!
-        </p>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, type: 'spring', stiffness: 120 }}
-        className="w-full max-w-3xl"
-      >
-        <Card className="mb-8 rounded-2xl shadow-lg border border-emerald-100 bg-white/80 hover:shadow-2xl transition-shadow duration-300">
-          <Tabs
-            defaultActiveKey="breakfast"
-            items={items}
-            className="custom-tabs"
-            tabBarGutter={24}
-            moreIcon={null}
-            animated
-          />
-        </Card>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
-        className="w-full max-w-4xl"
-      >
-        <Card
-          title={
-            <Title level={3} className="!mb-0 text-emerald-700">
-              Complete Week Menu
-            </Title>
-          }
-          className="rounded-2xl shadow-md border border-emerald-100 bg-white/80"
+    <div className="container mx-auto px-4 py-8 max-w-7xl mt-20">
+      <div className="flex items-center gap-4 mb-6">
+        <button
+          onClick={() => router.back()}
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
         >
-          <Table
-            dataSource={Object.entries(weeklyMenu)
-              .filter(([day]) => day !== '_id' && day !== 'hostelId')
-              .map(([day, meals]) => ({
-                key: day,
-                day,
-                breakfast: meals.breakfast.join(', ') || 'N/A',
-                lunch: meals.lunch.join(', ') || 'N/A',
-                dinner: meals.dinner.join(', ') || 'N/A'
-            }))}
-            columns={[
-              {
-                title: 'Day',
-                dataIndex: 'day',
-                key: 'day',
-                className: 'font-medium',
-                render: (text: string) => <span className="text-emerald-700 font-semibold">{text}</span>
-              },
-              {
-                title: 'Breakfast',
-                dataIndex: 'breakfast',
-                key: 'breakfast',
-                className: 'text-gray-600',
-                render: (text: string) => <span className="hover:bg-green-50 px-2 py-1 rounded transition-colors duration-200">{text}</span>
-              },
-              {
-                title: 'Lunch',
-                dataIndex: 'lunch',
-                key: 'lunch',
-                className: 'text-gray-600',
-                render: (text: string) => <span className="hover:bg-blue-50 px-2 py-1 rounded transition-colors duration-200">{text}</span>
-              },
-              {
-                title: 'Dinner',
-                dataIndex: 'dinner',
-                key: 'dinner',
-                className: 'text-gray-600',
-                render: (text: string) => <span className="hover:bg-emerald-50 px-2 py-1 rounded transition-colors duration-200">{text}</span>
-              }
-            ]}
-            pagination={false}
-            bordered
-            className="rounded-xl overflow-hidden"
-          />
-        </Card>
-      </motion.div>
+          <ArrowLeft className="w-6 h-6 text-gray-600" />
+        </button>
+        <Title level={2} className="!mb-0">Meal Options - {selectedDay}</Title>
+      </div>
+      
+      <Card className="mb-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+        <Tabs 
+          defaultActiveKey="breakfast" 
+          items={items}
+          className="custom-tabs"
+        />
+      </Card>
+
+      <Card 
+        title={
+          <Title level={3} className="!mb-0">
+            Complete Week Menu
+          </Title>
+        }
+        className="rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100"
+      >
+        <Table
+          dataSource={Object.entries(weeklyMenu)
+            .filter(([day]) => day !== '_id' && day !== 'hostelId') // Filter out non-day entries
+            .map(([day, meals]) => ({
+              key: day,
+              day,
+              breakfast: meals.breakfast.join(', ') || 'N/A',
+              lunch: meals.lunch.join(', ') || 'N/A',
+              dinner: meals.dinner.join(', ') || 'N/A'
+          }))}
+          columns={[
+            { 
+              title: 'Day', 
+              dataIndex: 'day', 
+              key: 'day',
+              className: 'font-medium'
+            },
+            { 
+              title: 'Breakfast', 
+              dataIndex: 'breakfast', 
+              key: 'breakfast',
+              className: 'text-gray-600'
+            },
+            { 
+              title: 'Lunch', 
+              dataIndex: 'lunch', 
+              key: 'lunch',
+              className: 'text-gray-600'
+            },
+            { 
+              title: 'Dinner', 
+              dataIndex: 'dinner', 
+              key: 'dinner',
+              className: 'text-gray-600'
+            }
+          ]}
+          pagination={false}
+          bordered
+          className="rounded-xl overflow-hidden"
+        />
+      </Card>
 
       <style jsx global>{`
         .custom-tabs .ant-tabs-nav::before {
           border: none;
         }
         .custom-tabs .ant-tabs-tab {
-          padding: 14px 28px;
+          padding: 12px 24px;
           margin: 0;
-          font-weight: 600;
-          color: #059669;
-          background: #f0fdf4;
-          border-radius: 12px 12px 0 0;
-          transition: background 0.2s;
         }
         .custom-tabs .ant-tabs-tab-active {
-          background-color: #d1fae5;
-          color: #047857;
+          background-color: #f8fafc;
           border-radius: 12px 12px 0 0;
         }
         .custom-tabs .ant-tabs-ink-bar {
           display: none;
         }
         .meal-option {
-          padding: 28px;
+          padding: 24px;
           background-color: #f8fafc;
           border-radius: 0 12px 12px 12px;
-          box-shadow: 0 2px 16px 0 rgba(16, 185, 129, 0.07);
         }
         .meal-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
         }
         .meal-items {
           display: grid;
-          gap: 10px;
+          gap: 8px;
         }
         .menu-item {
-          padding: 10px 18px;
-          background-color: #e0f2fe;
+          padding: 8px 16px;
+          background-color: white;
           border-radius: 8px;
-          border: 1px solid #bae6fd;
-          font-weight: 500;
-          color: #0369a1;
-          box-shadow: 0 1px 4px 0 rgba(59, 130, 246, 0.04);
-          transition: background 0.2s, box-shadow 0.2s;
-        }
-        .menu-item:hover {
-          background-color: #bbf7d0;
-          color: #047857;
-          box-shadow: 0 2px 8px 0 rgba(16, 185, 129, 0.09);
+          border: 1px solid #e5e7eb;
         }
         .qr-code {
-          margin-top: 28px;
+          margin-top: 24px;
           display: flex;
           justify-content: center;
-          transition: transform 0.2s;
         }
       `}</style>
     </div>
