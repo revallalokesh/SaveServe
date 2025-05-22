@@ -44,7 +44,7 @@ export function Students() {
 
   const fetchHostels = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/hostels')
+      const response = await fetch('https://save-serve-server.onrender.com/api/hostels')
       if (!response.ok) {
         throw new Error('Failed to fetch hostels')
       }
@@ -61,7 +61,7 @@ export function Students() {
   const fetchStudentsByHostel = async (hostelId: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`http://localhost:5001/api/students/hostel/${hostelId}`)
+      const response = await fetch(`https://save-serve-server.onrender.com/api/students/hostel/${hostelId}`)
       if (!response.ok) {
         throw new Error('Failed to fetch students')
       }
@@ -87,7 +87,7 @@ export function Students() {
     if (!selectedStudent) return;
     
     try {
-      const response = await fetch(`http://localhost:5001/api/students/${selectedStudent._id}/reset-password`, {
+      const response = await fetch(`https://save-serve-server.onrender.com/api/students/${selectedStudent._id}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
